@@ -1,7 +1,3 @@
-// ==========================================
-// MODUL SIMULASI 1: Silinder Menggelinding
-// ==========================================
-
 export function initRollingSim(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
@@ -10,16 +6,15 @@ export function initRollingSim(canvasId) {
     const PIXELS_PER_METER = 40;
     const CYLINDER_RADIUS = 25; 
 
-    // Simulation Loop Variable
     let animationFrameId;
     let isActive = true;
 
-    // --- State & Params ---
+    // Params
     let params = { g: 9.8, m: 5.0, mu_s: 0.5, mu_k: 0.3, theta: 15.0 };
     let state = { pos: 0.0, vel: 0.0, rotation_angle: 0.0, lastTime: 0, is_slipping: false };
     let physics_output = { accel: 0, friction: 0, torque: 0, normal: 0, weight: 0, mode: "Diam" };
 
-    // --- DOM Elements ---
+    // Elements
     const sliders = {
         g: document.getElementById('slider-g'),
         m: document.getElementById('slider-m'),
@@ -46,14 +41,12 @@ export function initRollingSim(canvasId) {
         params.mu_s = parseFloat(sliders.mus.value);
         params.theta = parseFloat(sliders.theta.value);
         
-        // Simple display update
         if(displays.g) displays.g.textContent = params.g.toFixed(1) + " m/s²";
         if(displays.m) displays.m.textContent = params.m.toFixed(1) + " kg";
         if(displays.mus) displays.mus.textContent = params.mu_s.toFixed(2);
         if(displays.theta) displays.theta.textContent = params.theta.toFixed(1) + "°";
     }
 
-    // Attach Listeners
     const listeners = [];
     Object.values(sliders).forEach(s => { 
         if(s) {
@@ -71,7 +64,6 @@ export function initRollingSim(canvasId) {
         listeners.push({ el: btnReset, type: 'click', fn: resetFn });
     }
 
-    // --- Physics Logic ---
     function updatePhysics(dt) {
         const rad = params.theta * Math.PI / 180;
         const fg = params.m * params.g;
@@ -80,10 +72,10 @@ export function initRollingSim(canvasId) {
         physics_output.weight = fg;
         physics_output.normal = fg_normal;
 
-        const k = 0.5; // Silinder Pejal
+        const k = 0.5; 
         const f_req_rolling = (k * fg_parallel) / (1 + k);
         const f_max_static = params.mu_s * fg_normal;
-        const f_kinetic = 0.3 * fg_normal; // Simplified kinetic friction
+        const f_kinetic = 0.3 * fg_normal; 
 
         let accel = 0;
         let friction = 0;
@@ -143,7 +135,6 @@ export function initRollingSim(canvasId) {
 
         updatePhysics(dt);
 
-        // Update UI
         if(displays.state) {
             displays.state.textContent = physics_output.mode;
             displays.state.style.color = state.is_slipping ? '#f87171' : '#4ade80';
@@ -153,8 +144,11 @@ export function initRollingSim(canvasId) {
             displays.torque.textContent = physics_output.torque.toFixed(2) + " Nm";
         }
 
-        // Render
-        if(canvas.width === 0) { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; }
+        if(canvas.width === 0 || canvas.width !== canvas.parentElement.clientWidth) { 
+            canvas.width = canvas.parentElement.clientWidth; 
+            canvas.height = canvas.parentElement.clientHeight; 
+        }
+        
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const cx = canvas.width / 2;
         const cy = canvas.height / 2 + 100;
@@ -198,11 +192,9 @@ export function initRollingSim(canvasId) {
         animationFrameId = requestAnimationFrame(loop);
     }
 
-    // Initialize
     updateParams();
     animationFrameId = requestAnimationFrame(loop);
 
-    // Return Cleanup Function
     return function stop() {
         isActive = false;
         cancelAnimationFrame(animationFrameId);
