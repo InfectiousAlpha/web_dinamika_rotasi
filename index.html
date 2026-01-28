@@ -25,7 +25,6 @@
                     },
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
-                        'float-delayed': 'float 6s ease-in-out 3s infinite',
                     }
                 }
             }
@@ -67,8 +66,8 @@
 
             <!-- Tab Navigation -->
             <div class="flex justify-center gap-4 mb-8 reveal active">
-                <button id="tab-rolling" class="px-6 py-3 rounded-full font-bold text-sm transition-all bg-green-600 text-white shadow-lg shadow-green-500/20">
-                    Simulasi 1: Silinder Menggelinding
+                <button id="tab-single" class="px-6 py-3 rounded-full font-bold text-sm transition-all bg-green-600 text-white shadow-lg shadow-green-500/20">
+                    Simulasi 1: Partikel Tunggal
                 </button>
                 <button id="tab-rigid" class="px-6 py-3 rounded-full font-bold text-sm transition-all bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-white/10">
                     Simulasi 2: Sistem Rigid Rotor
@@ -79,9 +78,9 @@
             <div class="glass-panel p-8 rounded-2xl reveal active border-l-4 border-l-purple-500 relative overflow-hidden transition-all duration-500" id="sim-border-color">
                 
                 <!-- Info Header (Dynamic) -->
-                <div id="info-rolling" class="mb-6">
-                    <h3 class="text-2xl font-bold text-white">Silinder Menggelinding</h3>
-                    <p class="text-purple-400 text-sm font-mono mt-1">Analisis Gerak Menggelinding vs Tergelincir pada Bidang Miring</p>
+                <div id="info-single" class="mb-6">
+                    <h3 class="text-2xl font-bold text-white">Rotasi Partikel Tunggal</h3>
+                    <p class="text-purple-400 text-sm font-mono mt-1">Momen Inersia (I = mr²) & Hubungan Torsi dengan Percepatan Sudut</p>
                 </div>
                 <div id="info-rigid" class="mb-6 hidden">
                     <h3 class="text-2xl font-bold text-white">Sistem Rigid Rotor 2D</h3>
@@ -95,31 +94,32 @@
                     <div class="w-full md:w-80 p-6 flex flex-col gap-4 bg-slate-900/80 border-b md:border-b-0 md:border-r border-white/10 overflow-y-auto shrink-0 z-10 backdrop-blur-sm">
                         <h2 class="text-lg font-bold text-green-400 mb-2">Parameter</h2>
 
-                        <!-- KONTROL SIMULASI 1 (ROLLING) -->
-                        <div id="controls-rolling" class="flex flex-col gap-4">
+                        <!-- KONTROL SIMULASI 1 (SINGLE PARTICLE) - BARU -->
+                        <div id="controls-single" class="flex flex-col gap-4">
                             <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                    <label>Gravitasi (g)</label> <span id="val-g">9.8 m/s²</span>
+                                    <label class="text-blue-400">Massa (m)</label> <span id="val-s-m">2.0 kg</span>
                                 </div>
-                                <input type="range" id="slider-g" min="1" max="25" step="0.1" value="9.8">
+                                <input type="range" id="slider-s-m" min="0.5" max="10" step="0.5" value="2.0">
                             </div>
                             <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                    <label>Massa (m)</label> <span id="val-m">5.0 kg</span>
+                                    <label>Jari-jari (r)</label> <span id="val-s-r">150 px</span>
                                 </div>
-                                <input type="range" id="slider-m" min="1" max="50" step="0.5" value="5.0">
+                                <input type="range" id="slider-s-r" min="50" max="250" step="10" value="150">
+                            </div>
+                            <div class="w-full h-px bg-white/10 my-1"></div>
+                            <div class="control-group">
+                                <div class="flex justify-between text-sm mb-1 text-slate-300">
+                                    <label class="text-orange-400">Gaya Tangensial (F)</label> <span id="val-s-f">0.0 N</span>
+                                </div>
+                                <input type="range" id="slider-s-f" min="-20" max="20" step="0.5" value="0.0">
                             </div>
                             <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                    <label>Koef. Gesek (μs)</label> <span id="val-mus">0.50</span>
+                                    <label>Hambatan Udara</label> <span id="val-s-damp">0.00</span>
                                 </div>
-                                <input type="range" id="slider-mus" min="0" max="1" step="0.01" value="0.5">
-                            </div>
-                            <div class="control-group">
-                                <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                    <label>Sudut (θ)</label> <span id="val-theta">15.0°</span>
-                                </div>
-                                <input type="range" id="slider-theta" min="0" max="60" step="0.5" value="15.0">
+                                <input type="range" id="slider-s-damp" min="0" max="1" step="0.01" value="0.0">
                             </div>
                         </div>
 
@@ -143,15 +143,12 @@
                                 </div>
                                 <input type="range" id="slider-len" min="50" max="250" step="10" value="150">
                             </div>
-
-                            <!-- INPUT BARU: SLIDER GESEKAN -->
                             <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
                                     <label>Hambatan Udara</label> <span id="val-damping">0.00</span>
                                 </div>
                                 <input type="range" id="slider-damping" min="0" max="1" step="0.01" value="0.0">
                             </div>
-
                             <div class="w-full h-px bg-white/10 my-1"></div>
                             <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
@@ -175,16 +172,16 @@
                     <!-- Shared Canvas Container -->
                     <div class="flex-grow relative h-full w-full sim-container bg-slate-800/20" id="canvas-container">
                         
-                        <!-- Overlay Stats: Rolling -->
-                        <div id="stats-rolling" class="absolute top-4 right-4 p-4 bg-slate-900/80 rounded-lg text-xs font-mono border border-slate-700 pointer-events-none z-10 backdrop-blur-sm shadow-xl min-w-[200px]">
+                        <!-- Overlay Stats: Single Particle -->
+                        <div id="stats-single" class="absolute top-4 right-4 p-4 bg-slate-900/80 rounded-lg text-xs font-mono border border-slate-700 pointer-events-none z-10 backdrop-blur-sm shadow-xl min-w-[200px]">
                             <div class="flex justify-between text-emerald-400 font-bold mb-2 border-b border-slate-600 pb-1 gap-4">
-                                <span>Status</span> <span id="stat-state" class="text-white">Diam</span>
+                                <span>Status Partikel</span>
                             </div>
                             <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-400">
-                                <span>Kecepatan:</span> <span id="stat-vel" class="text-right text-slate-200">0.00 m/s</span>
-                                <span>Percepatan:</span> <span id="stat-acc" class="text-right text-slate-200">0.00 m/s²</span>
-                                <span>Gaya Gesek:</span> <span id="stat-f" class="text-right text-orange-400">0.0 N</span>
-                                <span class="text-white font-bold">Torsi:</span> <span id="stat-torque-roll" class="text-right text-white font-bold">0.0 Nm</span>
+                                <span>Inersia (I):</span> <span id="stat-s-inertia" class="text-right text-slate-200">0.0</span>
+                                <span>Vel Sudut:</span> <span id="stat-s-omega" class="text-right text-slate-200">0.0</span>
+                                <span>Percepatan:</span> <span id="stat-s-alpha" class="text-right text-purple-300">0.0</span>
+                                <span class="text-white font-bold">Torsi:</span> <span id="stat-s-torque" class="text-right text-white font-bold">0.0 Nm</span>
                             </div>
                         </div>
 
@@ -209,7 +206,7 @@
         </div>
     </section>
 
-    <!-- Import Main Module (Tanpa logika di dalam HTML) -->
+    <!-- PENTING: type="module" memungkinkan penggunaan import/export -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
