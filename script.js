@@ -117,64 +117,57 @@ mobileLinks.forEach(link => link.addEventListener('click', toggleMenu));
 
 
 // ==========================================
-// 3. Physics Simulation (Rolling Cylinder)
+// 3. Physics Simulation (Rigid Rotor 2D)
 // ==========================================
 (function() {
     // --- Simulation Constants ---
-    const PIXELS_PER_METER = 40;
-    const CYLINDER_RADIUS = 25; // in pixels visually
+    const TIME_STEP = 0.016; // Fixed step approximation
 
     // --- State ---
     let params = {
-        g: 9.8,
-        m: 5.0,
-        mu_s: 0.5,
-        mu_k: 0.3,
-        theta: 15.0
+        m1: 2.0,
+        m2: 2.0,
+        L: 150,
+        f1: 0.0,
+        f2: 0.0
     };
 
     let state = {
-        pos: 0.0, // position along incline (meters)
-        vel: 0.0, // velocity (m/s)
-        rotation_angle: 0.0, // visual rotation (radians)
-        lastTime: 0,
-        is_slipping: false
+        pos: { x: 0, y: 0 }, // Center of Mass position relative to canvas center
+        vel: { x: 0, y: 0 }, // Velocity of Center of Mass
+        angle: 0,            // Orientation angle (radians)
+        angularVel: 0,       // Angular Velocity (rad/s)
+        lastTime: 0
     };
 
     let physics_output = {
-        accel: 0,
-        friction: 0,
+        inertia: 0,
         torque: 0,
-        normal: 0,
-        weight: 0,
-        mode: "Diam"
+        f_net_mag: 0
     };
 
     // --- DOM Elements ---
     const canvas = document.getElementById('sim-canvas');
-    
-    // Guard clause if canvas doesn't exist (e.g. on other pages)
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
     const sliders = {
-        g: document.getElementById('slider-g'),
-        m: document.getElementById('slider-m'),
-        mus: document.getElementById('slider-mus'),
-        muk: document.getElementById('slider-muk'),
-        theta: document.getElementById('slider-theta')
+        m1: document.getElementById('slider-m1'),
+        m2: document.getElementById('slider-m2'),
+        len: document.getElementById('slider-len'),
+        f1: document.getElementById('slider-f1'),
+        f2: document.getElementById('slider-f2')
     };
     const displays = {
-        g: document.getElementById('val-g'),
-        m: document.getElementById('val-m'),
-        mus: document.getElementById('val-mus'),
-        muk: document.getElementById('val-muk'),
-        theta: document.getElementById('val-theta'),
-        state: document.getElementById('stat-state'),
-        vel: document.getElementById('stat-vel'),
-        acc: document.getElementById('stat-acc'),
-        fg: document.getElementById('stat-fg'),
-        f: document.getElementById('stat-f'),
+        m1: document.getElementById('val-m1'),
+        m2: document.getElementById('val-m2'),
+        len: document.getElementById('val-len'),
+        f1: document.getElementById('val-f1'),
+        f2: document.getElementById('val-f2'),
+        inertia: document.getElementById('stat-inertia'),
+        omega: document.getElementById('stat-omega'),
+        v: document.getElementById('stat-v'),
+        fnet: document.getElementById('stat-fnet'),
         torque: document.getElementById('stat-torque')
     };
 
@@ -188,113 +181,165 @@ mobileLinks.forEach(link => link.addEventListener('click', toggleMenu));
     resize();
 
     function updateParams() {
-        params.g = parseFloat(sliders.g.value);
-        params.m = parseFloat(sliders.m.value);
-        params.mu_s = parseFloat(sliders.mus.value);
-        params.mu_k = parseFloat(sliders.muk.value);
-        params.theta = parseFloat(sliders.theta.value);
+        params.m1 = parseFloat(sliders.m1.value);
+        params.m2 = parseFloat(sliders.m2.value);
+        params.L = parseFloat(sliders.len.value);
+        params.f1 = parseFloat(sliders.f1.value);
+        params.f2 = parseFloat(sliders.f2.value);
 
-        displays.g.textContent = params.g.toFixed(1) + " m/s²";
-        displays.m.textContent = params.m.toFixed(1) + " kg";
-        displays.mus.textContent = params.mu_s.toFixed(2);
-        displays.muk.textContent = params.mu_k.toFixed(2);
-        displays.theta.textContent = params.theta.toFixed(1) + "°";
+        displays.m1.textContent = params.m1.toFixed(1) + " kg";
+        displays.m2.textContent = params.m2.toFixed(1) + " kg";
+        displays.len.textContent = params.L.toFixed(0) + " px";
+        displays.f1.textContent = params.f1.toFixed(1) + " N";
+        displays.f2.textContent = params.f2.toFixed(1) + " N";
     }
 
     Object.values(sliders).forEach(s => s.addEventListener('input', updateParams));
+    
     document.getElementById('btn-reset').addEventListener('click', () => {
-        state.pos = 0;
-        state.vel = 0;
-        state.rotation_angle = 0;
+        state.pos = { x: 0, y: 0 };
+        state.vel = { x: 0, y: 0 };
+        state.angle = 0;
+        state.angularVel = 0;
     });
 
     // --- Physics Core ---
     function updatePhysics(dt) {
-        const rad = params.theta * Math.PI / 180;
+        // 1. Calculate Center of Mass properties
+        const M = params.m1 + params.m2;
         
-        // Components
-        const fg = params.m * params.g;
-        const fg_parallel = fg * Math.sin(rad);
-        const fg_normal = fg * Math.cos(rad);
+        // Distances from CM to particles
+        // r1 is distance to m1, r2 is distance to m2
+        // m1 * r1 = m2 * r2  AND  r1 + r2 = L
+        const r1 = (params.m2 / M) * params.L;
+        const r2 = (params.m1 / M) * params.L;
+
+        // Moment of Inertia about CM
+        const I = params.m1 * r1 * r1 + params.m2 * r2 * r2;
+        physics_output.inertia = I;
+
+        // 2. Forces and Torques (Local Frame -> World Frame)
+        // Forces are applied perpendicular to the rod.
+        // F1 vector in local frame: (0, -f1) if rod is along X.
+        // F2 vector in local frame: (0, -f2).
         
-        physics_output.weight = fg;
-        physics_output.normal = fg_normal;
-
-        // Inertia for Solid Cylinder: I = 1/2 m R^2
-        // We use k = 0.5
-        const k = 0.5;
-
-        // Force calculations
-        const f_req_rolling = (k * fg_parallel) / (1 + k);
-        const f_max_static = params.mu_s * fg_normal;
-        const f_kinetic = params.mu_k * fg_normal;
-
-        let accel = 0;
-        let friction = 0;
-        let is_moving = false;
-
-        if (params.theta > 0.1) {
-            is_moving = true;
-            // Check if it slips
-            if (f_req_rolling <= f_max_static) {
-                // Pure Rolling
-                state.is_slipping = false;
-                friction = f_req_rolling;
-                accel = (params.g * Math.sin(rad)) / (1 + k);
-                physics_output.mode = "Menggelinding Murni";
-            } else {
-                // Slipping (Rolling + Sliding)
-                state.is_slipping = true;
-                friction = f_kinetic; // Kinetic friction acts up the slope
-                accel = (fg_parallel - friction) / params.m;
-                physics_output.mode = "Menggelinding + Slip";
-            }
-        } else {
-            state.is_slipping = false;
-            physics_output.mode = "Diam";
-        }
-
-        // Update Kinematics
-        state.vel += accel * dt;
-        state.pos += state.vel * dt;
-
-        // Update Rotation Angle
-        const R_physics = 1.0; 
+        // We need to rotate these forces by 'angle' to get world components.
+        // Force direction is Angle + 90 degrees (perpendicular)
+        const forceDir = state.angle - Math.PI / 2;
         
-        if (state.is_slipping) {
-            const alpha = (2 * friction) / (params.m * R_physics);
-            const current_omega = (state.vel / R_physics) * 0.5;
-            state.rotation_angle += (current_omega + alpha * dt) * dt * 5; 
-        } else {
-            const dPosPixels = (state.vel * dt) * PIXELS_PER_METER;
-            state.rotation_angle += dPosPixels / CYLINDER_RADIUS;
-        }
+        // F1 components (applied at particle 1)
+        const F1x = params.f1 * Math.cos(forceDir);
+        const F1y = params.f1 * Math.sin(forceDir);
 
-        physics_output.accel = accel;
-        physics_output.friction = friction;
-        physics_output.torque = friction * 0.25; 
+        // F2 components (applied at particle 2)
+        const F2x = params.f2 * Math.cos(forceDir);
+        const F2y = params.f2 * Math.sin(forceDir);
+
+        // Net Force (Translation)
+        const F_net_x = F1x + F2x;
+        const F_net_y = F1y + F2y;
+        
+        physics_output.f_net_mag = Math.sqrt(F_net_x*F_net_x + F_net_y*F_net_y);
+
+        // Torque (Rotation) about CM
+        // Torque = r x F. Since Forces are always perpendicular to r:
+        // Tau1 = r1 * f1 (careful with signs/direction).
+        // Let's define positive torque as Counter-Clockwise (CCW).
+        // Visual setup: P1 is Left/Top, P2 is Right/Bottom usually?
+        // Let's assume P1 is at angle + PI (left) and P2 is at angle (right) relative to CM locally?
+        // No, let's stick to: P1 is at distance r1 "behind", P2 is r2 "ahead".
+        // The force F1 is "up" in local frame. P1 is at local x = -r1. Torque = (-r1) * F1_y_local.
+        // Wait, cross product r x F.
+        // P1 vector from CM: magnitude r1, direction angle + PI.
+        // P2 vector from CM: magnitude r2, direction angle.
+        
+        // Torque produced by F1:
+        // P1 is at -r1 along rod. Force is "up" perpendicular.
+        // This creates a clockwise torque if F1 is positive? 
+        // Let's simplify: F1 pushes P1 "Forward" in rotation?
+        // Let's say positive F pushes "Counter-Clockwise".
+        // P1 is at -r1. Pushing it "up" (tangent) creates +Torque.
+        // P2 is at +r2. Pushing it "up" (tangent) creates +Torque.
+        // Wait, if both pushed "up" perpendicular, they translate.
+        // To rotate, one goes up, one down.
+        
+        // Let's define the slider F as "Tangential Force".
+        // P1 position relative to CM: (-r1, 0) rotated.
+        // P2 position relative to CM: (+r2, 0) rotated.
+        
+        // To create positive rotation (CCW):
+        // F1 must push in -Y local direction? No.
+        // Let's define F1 slider: Positive = pushes "Left" relative to rod facing P1?
+        // SIMPLER: F1 slider + : Pushes in direction of rotation +90 deg.
+        // Torque 1 = F1 * r1.
+        // Torque 2 = F2 * r2.
+        
+        // Actually, if F1 pushes in +90deg direction, and P1 is at -r1 (180deg),
+        // Torque = r x F = (-r1) * (F1) = -r1*F1. (Clockwise).
+        // P2 is at +r2 (0deg). Force +90deg.
+        // Torque = r x F = (r2) * (F2) = +r2*F2. (Counter-Clockwise).
+        
+        // So Net Torque:
+        const torque = (params.f2 * r2) - (params.f1 * r1);
+        physics_output.torque = torque;
+
+        // 3. Integration (Euler)
+        // Linear
+        const ax = F_net_x / M;
+        const ay = F_net_y / M;
+        
+        // Drag (Simulate air resistance to stop it floating forever)
+        const drag = 0.99;
+        state.vel.x = (state.vel.x + ax * dt) * drag;
+        state.vel.y = (state.vel.y + ay * dt) * drag;
+        
+        state.pos.x += state.vel.x * dt * 10; // *10 for pixel scaling visual speed
+        state.pos.y += state.vel.y * dt * 10;
+
+        // Angular
+        const alpha = torque / I * 500; // Scaling for visual responsiveness
+        const rotDrag = 0.98;
+        state.angularVel = (state.angularVel + alpha * dt) * rotDrag;
+        state.angle += state.angularVel * dt;
+
+        // 4. Boundary Check (Bounce)
+        const w = canvas.width / 2;
+        const h = canvas.height / 2;
+        const margin = 50;
+        
+        if (state.pos.x > w - margin) { state.pos.x = w - margin; state.vel.x *= -0.8; }
+        if (state.pos.x < -w + margin) { state.pos.x = -w + margin; state.vel.x *= -0.8; }
+        if (state.pos.y > h - margin) { state.pos.y = h - margin; state.vel.y *= -0.8; }
+        if (state.pos.y < -h + margin) { state.pos.y = -h + margin; state.vel.y *= -0.8; }
     }
 
-    function drawArrow(ctx, startX, startY, endX, endY, color, label) {
-        if (Math.abs(startX - endX) < 1 && Math.abs(startY - endY) < 1) return;
+    function drawArrow(ctx, startX, startY, angle, magnitude, color) {
+        if (Math.abs(magnitude) < 0.1) return;
+        
+        const scale = 5; // Pixels per Newton visual
+        const len = magnitude * scale;
+        
+        // End point
+        const endX = startX + Math.cos(angle) * len;
+        const endY = startY + Math.sin(angle) * len;
+
         ctx.strokeStyle = color;
         ctx.fillStyle = color;
         ctx.lineWidth = 3;
+
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(endX, endY);
         ctx.stroke();
-        const angle = Math.atan2(endY - startY, endX - startX);
-        const headLen = 10;
+
+        // Arrow head
+        const arrowAngle = Math.atan2(endY - startY, endX - startX);
+        const headLen = 8;
         ctx.beginPath();
         ctx.moveTo(endX, endY);
-        ctx.lineTo(endX - headLen * Math.cos(angle - Math.PI/6), endY - headLen * Math.sin(angle - Math.PI/6));
-        ctx.lineTo(endX - headLen * Math.cos(angle + Math.PI/6), endY - headLen * Math.sin(angle + Math.PI/6));
+        ctx.lineTo(endX - headLen * Math.cos(arrowAngle - Math.PI/6), endY - headLen * Math.sin(arrowAngle - Math.PI/6));
+        ctx.lineTo(endX - headLen * Math.cos(arrowAngle + Math.PI/6), endY - headLen * Math.sin(arrowAngle + Math.PI/6));
         ctx.fill();
-        if(label) {
-            ctx.font = "bold 14px Consolas";
-            ctx.fillText(label, endX + 10, endY + 10);
-        }
     }
 
     function loop(timestamp) {
@@ -304,94 +349,84 @@ mobileLinks.forEach(link => link.addEventListener('click', toggleMenu));
 
         updatePhysics(dt);
 
-        // UI Updates
-        displays.state.textContent = physics_output.mode;
-        displays.state.style.color = state.is_slipping ? '#f87171' : '#4ade80';
-        displays.vel.textContent = state.vel.toFixed(2) + " m/s";
-        displays.acc.textContent = physics_output.accel.toFixed(2) + " m/s²";
-        displays.fg.textContent = physics_output.weight.toFixed(1) + " N";
-        displays.f.textContent = physics_output.friction.toFixed(1) + " N";
-        displays.torque.textContent = physics_output.torque.toFixed(2) + " Nm";
+        // Updates UI Stats
+        displays.inertia.textContent = physics_output.inertia.toFixed(0);
+        displays.omega.textContent = state.angularVel.toFixed(2) + " rad/s";
+        
+        const v_mag = Math.sqrt(state.vel.x**2 + state.vel.y**2) * 10;
+        displays.v.textContent = v_mag.toFixed(1) + " px/s";
+        displays.fnet.textContent = physics_output.f_net_mag.toFixed(1) + " N";
+        displays.torque.textContent = physics_output.torque.toFixed(1) + " Nm";
 
         // Render
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
         const cx = canvas.width / 2;
-        const cy = canvas.height / 2 + 100;
-        const rad = params.theta * Math.PI / 180;
+        const cy = canvas.height / 2;
 
         ctx.save();
-        ctx.translate(cx, cy);
+        ctx.translate(cx + state.pos.x, cy + state.pos.y);
+        ctx.rotate(state.angle);
 
-        // Rotate World
-        ctx.rotate(-rad);
-
-        // Draw Incline
-        ctx.fillStyle = "#3f3f46"; 
-        ctx.fillRect(-1000, 0, 2000, 400); 
-        ctx.fillStyle = "#22c55e"; 
-        ctx.fillRect(-1000, 0, 2000, 4); 
-
-        // Draw Distance Markers
-        ctx.strokeStyle = "rgba(255,255,255,0.3)";
-        ctx.lineWidth = 2;
-        const spacing = 100;
-        const offset = (state.pos * PIXELS_PER_METER) % spacing;
-        for(let i = -10; i < 10; i++) {
-            let x = i * spacing - offset;
-            if(x > -cx - 500 && x < cx + 500) {
-                ctx.beginPath();
-                ctx.moveTo(x, 4);
-                ctx.lineTo(x, 14);
-                ctx.stroke();
-            }
-        }
-
-        // Draw Cylinder
-        const cylY = -CYLINDER_RADIUS;
-        ctx.translate(0, cylY); 
+        // --- Draw System in Local Frame (rotated) ---
         
-        ctx.save();
-        ctx.rotate(state.rotation_angle); 
-        
-        // Body
-        ctx.fillStyle = "#3b82f6";
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 2;
+        const M = params.m1 + params.m2;
+        const r1 = (params.m2 / M) * params.L;
+        const r2 = (params.m1 / M) * params.L;
+
+        // Rod
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.arc(0, 0, CYLINDER_RADIUS, 0, Math.PI*2);
+        ctx.moveTo(-r1, 0);
+        ctx.lineTo(r2, 0);
+        ctx.stroke();
+
+        // Particle 1 (Left/Negative Local X) - Blue
+        const p1Size = 5 + params.m1 * 3;
+        ctx.fillStyle = "#3b82f6"; // Blue
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#3b82f6";
+        ctx.beginPath();
+        ctx.arc(-r1, 0, p1Size, 0, Math.PI*2);
         ctx.fill();
-        ctx.stroke();
-
-        // Spoke
-        ctx.strokeStyle = "rgba(255,255,255,0.8)";
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(CYLINDER_RADIUS, 0); 
-        ctx.stroke();
+        ctx.shadowBlur = 0;
         
-        // Dot
-        ctx.fillStyle = "white";
+        // Force 1 Vector (Applied at P1)
+        // Force angle relative to rod is -90 deg (up in screen, but coordinate system y is down?)
+        // Let's use the local frame drawing.
+        // Force direction: Perpendicular to rod.
+        // F1 positive slider -> pushes P1 "Up" (-Y in canvas).
+        drawArrow(ctx, -r1, 0, -Math.PI/2, params.f1, "#60a5fa");
+
+        // Particle 2 (Right/Positive Local X) - Orange
+        const p2Size = 5 + params.m2 * 3;
+        ctx.fillStyle = "#fb923c"; // Orange
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#fb923c";
+        ctx.beginPath();
+        ctx.arc(r2, 0, p2Size, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Force 2 Vector (Applied at P2)
+        // F2 positive slider -> pushes P2 "Up" (-Y in canvas).
+        drawArrow(ctx, r2, 0, -Math.PI/2, params.f2, "#fbbf24");
+
+        // Center of Mass Marker
+        ctx.fillStyle = "#ffffff";
         ctx.beginPath();
         ctx.arc(0, 0, 3, 0, Math.PI*2);
         ctx.fill();
         
-        ctx.restore(); 
+        // Pivot/CM Label
+        ctx.rotate(-state.angle); // Cancel rotation for text
+        ctx.font = "10px monospace";
+        ctx.fillStyle = "rgba(255,255,255,0.5)";
+        ctx.fillText("CM", -6, 15);
 
-        // Draw Forces (Vectors)
-        const scale = 3.0;
+        ctx.restore();
 
-        // Friction
-        drawArrow(ctx, 0, CYLINDER_RADIUS, -physics_output.friction * scale, CYLINDER_RADIUS, "#fb923c", "f"); 
-
-        // Weight Components
-        const W_par = physics_output.weight * Math.sin(rad); 
-        const W_norm = physics_output.weight * Math.cos(rad);
-        drawArrow(ctx, 0, 0, W_par * scale, W_norm * scale, "#d8b4fe", "w");
-
-        // Normal Force
-        drawArrow(ctx, 0, CYLINDER_RADIUS, 0, CYLINDER_RADIUS - physics_output.normal * scale, "#ffffff", "N");
-
-        ctx.restore(); 
         requestAnimationFrame(loop);
     }
 
