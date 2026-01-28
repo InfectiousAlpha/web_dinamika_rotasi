@@ -68,69 +68,61 @@
             </div>
 
             <!-- Tab Navigation -->
-            <div class="flex justify-center flex-wrap gap-4 mb-8 reveal active">
+            <div class="flex justify-center gap-4 mb-8 reveal active">
                 <button id="tab-single" class="px-6 py-3 rounded-full font-bold text-sm transition-all bg-green-600 text-white shadow-lg shadow-green-500/20">
-                    Sim 1: Partikel Tunggal
+                    Simulasi 1: Partikel Tunggal
                 </button>
                 <button id="tab-rigid" class="px-6 py-3 rounded-full font-bold text-sm transition-all bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-white/10">
-                    Sim 2: Rigid Rotor
-                </button>
-                <button id="tab-multi" class="px-6 py-3 rounded-full font-bold text-sm transition-all bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-white/10">
-                    Sim 3: Banyak Partikel
+                    Simulasi 2: Sistem Rigid Rotor
                 </button>
             </div>
 
             <!-- Simulation Container -->
             <div class="glass-panel p-8 rounded-2xl reveal active border-l-4 border-l-purple-500 relative overflow-hidden transition-all duration-500" id="sim-border-color">
                 
-                <!-- Info Header: Single -->
+                <!-- Info Header (Dynamic) -->
                 <div id="info-single" class="mb-6">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <h3 class="text-2xl font-bold text-white">Rotasi Partikel Tunggal</h3>
                             <p class="text-purple-400 text-sm font-mono mt-1">Hukum II Newton untuk Rotasi</p>
                         </div>
+                        <!-- Rumus Display Box -->
                         <div class="bg-slate-800/50 border border-white/10 rounded-lg p-3 px-5 backdrop-blur-sm">
                             <div class="text-xs text-slate-400 mb-1 font-semibold uppercase tracking-wider">Rumus Dasar</div>
                             <div class="flex gap-6 text-sm md:text-base text-white font-serif">
-                                <span>\(\tau = r \cdot F\)</span>
-                                <span class="w-px bg-white/10 h-full mx-1"></span>
-                                <span>\(I = m \cdot r^2\)</span>
+                                <div class="flex flex-col items-center">
+                                    <span>\(\tau = r \cdot F\)</span>
+                                    <span class="text-[10px] text-slate-500 font-sans mt-1">Torsi</span>
+                                </div>
+                                <div class="w-px bg-white/10 h-full mx-1"></div>
+                                <div class="flex flex-col items-center">
+                                    <span>\(I = m \cdot r^2\)</span>
+                                    <span class="text-[10px] text-slate-500 font-sans mt-1">Inersia</span>
+                                </div>
+                                <div class="w-px bg-white/10 h-full mx-1"></div>
+                                <div class="flex flex-col items-center">
+                                    <span>\(\alpha = \frac{\tau}{I}\)</span>
+                                    <span class="text-[10px] text-slate-500 font-sans mt-1">Percepatan Sudut</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Info Header: Rigid -->
                 <div id="info-rigid" class="mb-6 hidden">
                     <h3 class="text-2xl font-bold text-white">Sistem Rigid Rotor 2D</h3>
                     <p class="text-purple-400 text-sm font-mono mt-1">Analisis Translasi & Rotasi pada Sistem 2 Partikel</p>
-                </div>
-
-                <!-- Info Header: Multi (NEW) -->
-                <div id="info-multi" class="mb-6 hidden">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h3 class="text-2xl font-bold text-white">Sistem Banyak Partikel</h3>
-                            <p class="text-purple-400 text-sm font-mono mt-1">Inersia Bersifat Aditif (Dijumlahkan)</p>
-                        </div>
-                        <div class="bg-slate-800/50 border border-white/10 rounded-lg p-3 px-5 backdrop-blur-sm">
-                            <div class="text-xs text-slate-400 mb-1 font-semibold uppercase tracking-wider">Inersia Total</div>
-                            <div class="text-sm md:text-base text-white font-serif">
-                                \(I_{total} = \sum_{i=1}^{n} m_i \cdot r_i^2\)
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Embedded Simulation Area -->
                 <div class="relative w-full h-[650px] md:h-[600px] bg-slate-900/50 rounded-xl overflow-hidden flex flex-col md:flex-row border border-white/10">
                     
                     <!-- Controls Sidebar -->
-                    <div class="w-full md:w-80 p-6 flex flex-col gap-4 bg-slate-900/80 border-b md:border-b-0 md:border-r border-white/10 overflow-y-auto shrink-0 z-10 backdrop-blur-sm custom-scrollbar">
-                        <h2 class="text-lg font-bold text-green-400 mb-2 sticky top-0 bg-slate-900/95 py-2 z-20">Parameter</h2>
+                    <div class="w-full md:w-80 p-6 flex flex-col gap-4 bg-slate-900/80 border-b md:border-b-0 md:border-r border-white/10 overflow-y-auto shrink-0 z-10 backdrop-blur-sm">
+                        <h2 class="text-lg font-bold text-green-400 mb-2">Parameter</h2>
 
-                        <!-- KONTROL SIMULASI 1 -->
+                        <!-- KONTROL SIMULASI 1 (SINGLE PARTICLE) -->
                         <div id="controls-single" class="flex flex-col gap-4">
                             <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
@@ -147,29 +139,29 @@
                             <div class="w-full h-px bg-white/10 my-1"></div>
                             <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                    <label class="text-orange-400">Gaya Tangensial</label> <span id="val-s-f">0.0 N</span>
+                                    <label class="text-orange-400">Gaya Tangensial (F)</label> <span id="val-s-f">0.0 N</span>
                                 </div>
                                 <input type="range" id="slider-s-f" min="-20" max="20" step="0.5" value="0.0">
                             </div>
                             <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                    <label>Hambatan</label> <span id="val-s-damp">0.00</span>
+                                    <label>Hambatan Udara</label> <span id="val-s-damp">0.00</span>
                                 </div>
                                 <input type="range" id="slider-s-damp" min="0" max="1" step="0.01" value="0.0">
                             </div>
                         </div>
 
-                        <!-- KONTROL SIMULASI 2 -->
+                        <!-- KONTROL SIMULASI 2 (RIGID) -->
                         <div id="controls-rigid" class="flex flex-col gap-4 hidden">
                             <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                    <label class="text-blue-400">Massa 1</label> <span id="val-m1">2.0 kg</span>
+                                    <label class="text-blue-400">Massa 1 (Biru)</label> <span id="val-m1">2.0 kg</span>
                                 </div>
                                 <input type="range" id="slider-m1" min="1" max="10" step="0.5" value="2.0">
                             </div>
                             <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                    <label class="text-orange-400">Massa 2</label> <span id="val-m2">2.0 kg</span>
+                                    <label class="text-orange-400">Massa 2 (Oranye)</label> <span id="val-m2">2.0 kg</span>
                                 </div>
                                 <input type="range" id="slider-m2" min="1" max="10" step="0.5" value="2.0">
                             </div>
@@ -179,9 +171,9 @@
                                 </div>
                                 <input type="range" id="slider-len" min="50" max="250" step="10" value="150">
                             </div>
-                             <div class="control-group">
+                            <div class="control-group">
                                 <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                    <label>Hambatan</label> <span id="val-damping">0.00</span>
+                                    <label>Hambatan Udara</label> <span id="val-damping">0.00</span>
                                 </div>
                                 <input type="range" id="slider-damping" min="0" max="1" step="0.01" value="0.0">
                             </div>
@@ -200,39 +192,6 @@
                             </div>
                         </div>
 
-                        <!-- KONTROL SIMULASI 3 (MULTI) - NEW -->
-                        <div id="controls-multi" class="flex flex-col gap-4 hidden">
-                            <!-- Global Controls -->
-                            <div class="p-3 rounded-lg bg-slate-800/50 border border-white/5">
-                                <div class="control-group mb-2">
-                                    <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                        <label class="text-yellow-400">Gaya Dorong (F)</label> <span id="val-m-f">0.0 N</span>
-                                    </div>
-                                    <input type="range" id="slider-m-f" min="-20" max="20" step="0.5" value="0.0">
-                                    <p class="text-[10px] text-slate-500 mt-1">*Gaya bekerja pada partikel terluar</p>
-                                </div>
-                                <div class="control-group">
-                                    <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                        <label>Hambatan</label> <span id="val-m-damp">0.00</span>
-                                    </div>
-                                    <input type="range" id="slider-m-damp" min="0" max="1" step="0.01" value="0.0">
-                                </div>
-                            </div>
-                            
-                            <div class="w-full h-px bg-white/10 my-1"></div>
-
-                            <!-- Action Buttons -->
-                            <button id="btn-add-particle" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-bold text-sm transition-colors flex items-center justify-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                Tambah Partikel
-                            </button>
-
-                            <!-- Dynamic List of Particles -->
-                            <div id="particle-list" class="flex flex-col gap-3 mt-2">
-                                <!-- Items will be injected here by JS -->
-                            </div>
-                        </div>
-
                         <button id="btn-reset" class="mt-4 py-2 px-4 bg-red-500/80 hover:bg-red-500 text-white rounded font-bold transition-colors">
                             Reset Posisi
                         </button>
@@ -241,7 +200,7 @@
                     <!-- Shared Canvas Container -->
                     <div class="flex-grow relative h-full w-full sim-container bg-slate-800/20" id="canvas-container">
                         
-                        <!-- Stats: Single -->
+                        <!-- Overlay Stats: Single Particle -->
                         <div id="stats-single" class="absolute top-4 right-4 p-4 bg-slate-900/80 rounded-lg text-xs font-mono border border-slate-700 pointer-events-none z-10 backdrop-blur-sm shadow-xl min-w-[200px]">
                             <div class="flex justify-between text-emerald-400 font-bold mb-2 border-b border-slate-600 pb-1 gap-4">
                                 <span>Status Partikel</span>
@@ -249,11 +208,12 @@
                             <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-400">
                                 <span>Inersia (I):</span> <span id="stat-s-inertia" class="text-right text-slate-200">0.0</span>
                                 <span>Vel Sudut:</span> <span id="stat-s-omega" class="text-right text-slate-200">0.0</span>
+                                <span>Percepatan:</span> <span id="stat-s-alpha" class="text-right text-purple-300">0.0</span>
                                 <span class="text-white font-bold">Torsi:</span> <span id="stat-s-torque" class="text-right text-white font-bold">0.0 Nm</span>
                             </div>
                         </div>
 
-                        <!-- Stats: Rigid -->
+                        <!-- Overlay Stats: Rigid -->
                         <div id="stats-rigid" class="absolute top-4 right-4 p-4 bg-slate-900/80 rounded-lg text-xs font-mono border border-slate-700 pointer-events-none z-10 backdrop-blur-sm shadow-xl min-w-[200px] hidden">
                             <div class="flex justify-between text-emerald-400 font-bold mb-2 border-b border-slate-600 pb-1 gap-4">
                                 <span>Status Sistem</span>
@@ -261,20 +221,8 @@
                             <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-400">
                                 <span>Inersia (I):</span> <span id="stat-inertia" class="text-right text-slate-200">0.0</span>
                                 <span>Vel Sudut:</span> <span id="stat-omega" class="text-right text-slate-200">0.0</span>
-                                <span class="text-white font-bold">Torsi:</span> <span id="stat-torque-rigid" class="text-right text-white font-bold">0.0</span>
-                            </div>
-                        </div>
-
-                        <!-- Stats: Multi (NEW) -->
-                        <div id="stats-multi" class="absolute top-4 right-4 p-4 bg-slate-900/80 rounded-lg text-xs font-mono border border-slate-700 pointer-events-none z-10 backdrop-blur-sm shadow-xl min-w-[200px] hidden">
-                            <div class="flex justify-between text-indigo-400 font-bold mb-2 border-b border-slate-600 pb-1 gap-4">
-                                <span>Status Total</span> <span id="stat-m-count" class="text-white">1 Partikel</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-400">
-                                <span>Inersia (ΣI):</span> <span id="stat-m-inertia" class="text-right text-white font-bold">0.0</span>
-                                <span>Vel Sudut:</span> <span id="stat-m-omega" class="text-right text-slate-200">0.0</span>
-                                <span>Torsi (τ):</span> <span id="stat-m-torque" class="text-right text-yellow-400">0.0</span>
-                                <span>Percepatan:</span> <span id="stat-m-alpha" class="text-right text-purple-300">0.0</span>
+                                <span>Vel Linear:</span> <span id="stat-v" class="text-right text-purple-300">0.0</span>
+                                <span class="text-white font-bold">Total Torsi:</span> <span id="stat-torque-rigid" class="text-right text-white font-bold">0.0</span>
                             </div>
                         </div>
 
