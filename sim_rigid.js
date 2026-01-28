@@ -72,7 +72,8 @@ export function initRigidSim(canvasId) {
         const I = params.m1 * r1 * r1 + params.m2 * r2 * r2;
         physics_output.inertia = I;
 
-        const forceDir = state.angle - Math.PI / 2;
+        // Force vector calculation relative to the rod's angle
+        const forceDir = state.angle - Math.PI / 2; // Perpendicular to rod
         const F1x = params.f1 * Math.cos(forceDir);
         const F1y = params.f1 * Math.sin(forceDir);
         const F2x = params.f2 * Math.cos(forceDir);
@@ -82,28 +83,43 @@ export function initRigidSim(canvasId) {
         const F_net_y = F1y + F2y;
         physics_output.f_net_mag = Math.sqrt(F_net_x*F_net_x + F_net_y*F_net_y);
 
+        // Torque calculation: tau = r x F
+        // r2 is positive distance, r1 is negative distance from CM
         const torque = (params.f2 * r2) - (params.f1 * r1);
         physics_output.torque = torque;
 
+        // Linear Motion (F = ma)
         const ax = F_net_x / M;
         const ay = F_net_y / M;
-        const drag = 0.99;
+        
+        // PERBAIKAN: Hilangkan drag (gesekan udara) agar sesuai Hukum Newton I
+        // Benda akan terus bergerak konstan jika resultan gaya 0
+        const drag = 1.0; 
+        
         state.vel.x = (state.vel.x + ax * dt) * drag;
         state.vel.y = (state.vel.y + ay * dt) * drag;
         state.pos.x += state.vel.x * dt * 10;
         state.pos.y += state.vel.y * dt * 10;
 
-        const alpha = torque / I * 500;
-        const rotDrag = 0.98;
+        // Rotational Motion (Tau = I * alpha)
+        const alpha = torque / I * 500; // Scaling factor for visual speed
+        
+        // PERBAIKAN UTAMA:
+        // Sebelumnya ada 'rotDrag = 0.98' yang membuat putaran melambat sendiri.
+        // Sekarang diubah jadi 1.0 (Inersia Murni).
+        const rotDrag = 1.0; 
+        
         state.angularVel = (state.angularVel + alpha * dt) * rotDrag;
         state.angle += state.angularVel * dt;
 
-        // Boundary Bounce
+        // Boundary Bounce (Pantulan dinding)
         const w = canvas.width / 2; const h = canvas.height / 2; const margin = 50;
-        if (state.pos.x > w - margin) { state.pos.x = w - margin; state.vel.x *= -0.8; }
-        if (state.pos.x < -w + margin) { state.pos.x = -w + margin; state.vel.x *= -0.8; }
-        if (state.pos.y > h - margin) { state.pos.y = h - margin; state.vel.y *= -0.8; }
-        if (state.pos.y < -h + margin) { state.pos.y = -h + margin; state.vel.y *= -0.8; }
+        // Damping saat menabrak dinding tetap diperlukan agar tidak "meledak" energinya
+        const wallDamp = 0.8;
+        if (state.pos.x > w - margin) { state.pos.x = w - margin; state.vel.x *= -wallDamp; }
+        if (state.pos.x < -w + margin) { state.pos.x = -w + margin; state.vel.x *= -wallDamp; }
+        if (state.pos.y > h - margin) { state.pos.y = h - margin; state.vel.y *= -wallDamp; }
+        if (state.pos.y < -h + margin) { state.pos.y = -h + margin; state.vel.y *= -wallDamp; }
     }
 
     function drawArrow(ctx, startX, startY, angle, magnitude, color) {
