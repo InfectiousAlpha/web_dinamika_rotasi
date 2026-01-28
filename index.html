@@ -65,67 +65,103 @@
     <section id="simulasi" class="min-h-screen flex items-center justify-center py-24 px-6 relative">
         <div class="max-w-7xl mx-auto w-full">
             <div class="text-center mb-8 reveal active">
-                <h2 class="text-3xl md:text-5xl font-bold mb-4">Laboratorium <span class="text-green-400">Rigid Rotor</span></h2>
+                <h2 class="text-3xl md:text-5xl font-bold mb-4">Laboratorium <span class="text-green-400">Virtual</span></h2>
                 <p class="text-slate-400 max-w-2xl mx-auto">
-                    Simulasi 2 Partikel yang terhubung batang tak bermassa.
-                    <br><span class="text-xs text-slate-500">(Kontrol HTML di bawah ini diset untuk Simulasi 2. Jika ingin menjalankan Simulasi 1, ubah import di script.js dan sesuaikan elemen HTML slider)</span>
+                    Pilih eksperimen di bawah ini untuk memulai simulasi.
                 </p>
             </div>
 
+            <!-- Tab Navigation -->
+            <div class="flex justify-center gap-4 mb-8 reveal active">
+                <button id="tab-rolling" class="px-6 py-3 rounded-full font-bold text-sm transition-all bg-green-600 text-white shadow-lg shadow-green-500/20">
+                    Simulasi 1: Silinder Menggelinding
+                </button>
+                <button id="tab-rigid" class="px-6 py-3 rounded-full font-bold text-sm transition-all bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-white/10">
+                    Simulasi 2: Sistem Rigid Rotor
+                </button>
+            </div>
+
             <!-- Simulation Container -->
-            <div class="glass-panel p-8 rounded-2xl reveal active border-l-4 border-l-purple-500">
-                <!-- Embedded Simulation -->
+            <div class="glass-panel p-8 rounded-2xl reveal active border-l-4 border-l-purple-500 relative overflow-hidden transition-all duration-500" id="sim-border-color">
+                
+                <!-- Info Header (Dynamic) -->
+                <div id="info-rolling" class="mb-6">
+                    <h3 class="text-2xl font-bold text-white">Silinder Menggelinding</h3>
+                    <p class="text-purple-400 text-sm font-mono mt-1">Analisis Gerak Menggelinding vs Tergelincir pada Bidang Miring</p>
+                </div>
+                <div id="info-rigid" class="mb-6 hidden">
+                    <h3 class="text-2xl font-bold text-white">Sistem Rigid Rotor 2D</h3>
+                    <p class="text-purple-400 text-sm font-mono mt-1">Analisis Translasi & Rotasi pada Sistem 2 Partikel</p>
+                </div>
+
+                <!-- Embedded Simulation Area -->
                 <div class="relative w-full h-[650px] md:h-[600px] bg-slate-900/50 rounded-xl overflow-hidden flex flex-col md:flex-row border border-white/10">
                     
-                    <!-- Controls Sidebar (Rigid Rotor Configuration) -->
+                    <!-- Controls Sidebar -->
                     <div class="w-full md:w-80 p-6 flex flex-col gap-4 bg-slate-900/80 border-b md:border-b-0 md:border-r border-white/10 overflow-y-auto shrink-0 z-10 backdrop-blur-sm">
-                        <h2 class="text-lg font-bold text-green-400 mb-2">Kontrol Sistem</h2>
+                        <h2 class="text-lg font-bold text-green-400 mb-2">Parameter</h2>
 
-                        <!-- Mass 1 -->
-                        <div class="control-group">
-                            <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                <label class="text-blue-400 font-bold">Massa 1 (Biru)</label>
-                                <span id="val-m1">2.0 kg</span>
+                        <!-- KONTROL SIMULASI 1 (ROLLING) -->
+                        <div id="controls-rolling" class="flex flex-col gap-4">
+                            <div class="control-group">
+                                <div class="flex justify-between text-sm mb-1 text-slate-300">
+                                    <label>Gravitasi (g)</label> <span id="val-g">9.8 m/s²</span>
+                                </div>
+                                <input type="range" id="slider-g" min="1" max="25" step="0.1" value="9.8">
                             </div>
-                            <input type="range" id="slider-m1" min="1" max="10" step="0.5" value="2.0">
+                            <div class="control-group">
+                                <div class="flex justify-between text-sm mb-1 text-slate-300">
+                                    <label>Massa (m)</label> <span id="val-m">5.0 kg</span>
+                                </div>
+                                <input type="range" id="slider-m" min="1" max="50" step="0.5" value="5.0">
+                            </div>
+                            <div class="control-group">
+                                <div class="flex justify-between text-sm mb-1 text-slate-300">
+                                    <label>Koef. Gesek (μs)</label> <span id="val-mus">0.50</span>
+                                </div>
+                                <input type="range" id="slider-mus" min="0" max="1" step="0.01" value="0.5">
+                            </div>
+                            <div class="control-group">
+                                <div class="flex justify-between text-sm mb-1 text-slate-300">
+                                    <label>Sudut (θ)</label> <span id="val-theta">15.0°</span>
+                                </div>
+                                <input type="range" id="slider-theta" min="0" max="60" step="0.5" value="15.0">
+                            </div>
                         </div>
 
-                        <!-- Mass 2 -->
-                        <div class="control-group">
-                            <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                <label class="text-orange-400 font-bold">Massa 2 (Oranye)</label>
-                                <span id="val-m2">2.0 kg</span>
+                        <!-- KONTROL SIMULASI 2 (RIGID) -->
+                        <div id="controls-rigid" class="flex flex-col gap-4 hidden">
+                            <div class="control-group">
+                                <div class="flex justify-between text-sm mb-1 text-slate-300">
+                                    <label class="text-blue-400">Massa 1 (Biru)</label> <span id="val-m1">2.0 kg</span>
+                                </div>
+                                <input type="range" id="slider-m1" min="1" max="10" step="0.5" value="2.0">
                             </div>
-                            <input type="range" id="slider-m2" min="1" max="10" step="0.5" value="2.0">
-                        </div>
-
-                        <!-- Length -->
-                        <div class="control-group">
-                            <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                <label>Panjang Batang</label>
-                                <span id="val-len">150 px</span>
+                            <div class="control-group">
+                                <div class="flex justify-between text-sm mb-1 text-slate-300">
+                                    <label class="text-orange-400">Massa 2 (Oranye)</label> <span id="val-m2">2.0 kg</span>
+                                </div>
+                                <input type="range" id="slider-m2" min="1" max="10" step="0.5" value="2.0">
                             </div>
-                            <input type="range" id="slider-len" min="50" max="250" step="10" value="150">
-                        </div>
-
-                        <div class="w-full h-px bg-white/10 my-2"></div>
-
-                        <!-- Force 1 -->
-                        <div class="control-group">
-                            <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                <label class="text-blue-400 font-bold">Gaya P1 (Thruster)</label>
-                                <span id="val-f1">0.0 N</span>
+                            <div class="control-group">
+                                <div class="flex justify-between text-sm mb-1 text-slate-300">
+                                    <label>Panjang Batang</label> <span id="val-len">150 px</span>
+                                </div>
+                                <input type="range" id="slider-len" min="50" max="250" step="10" value="150">
                             </div>
-                            <input type="range" id="slider-f1" min="-20" max="20" step="0.5" value="0.0">
-                        </div>
-
-                         <!-- Force 2 -->
-                        <div class="control-group">
-                            <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                <label class="text-orange-400 font-bold">Gaya P2 (Thruster)</label>
-                                <span id="val-f2">0.0 N</span>
+                            <div class="w-full h-px bg-white/10 my-1"></div>
+                            <div class="control-group">
+                                <div class="flex justify-between text-sm mb-1 text-slate-300">
+                                    <label class="text-blue-400">Gaya P1</label> <span id="val-f1">0.0 N</span>
+                                </div>
+                                <input type="range" id="slider-f1" min="-20" max="20" step="0.5" value="0.0">
                             </div>
-                            <input type="range" id="slider-f2" min="-20" max="20" step="0.5" value="0.0">
+                            <div class="control-group">
+                                <div class="flex justify-between text-sm mb-1 text-slate-300">
+                                    <label class="text-orange-400">Gaya P2</label> <span id="val-f2">0.0 N</span>
+                                </div>
+                                <input type="range" id="slider-f2" min="-20" max="20" step="0.5" value="0.0">
+                            </div>
                         </div>
 
                         <button id="btn-reset" class="mt-4 py-2 px-4 bg-red-500/80 hover:bg-red-500 text-white rounded font-bold transition-colors">
@@ -133,18 +169,35 @@
                         </button>
                     </div>
 
-                    <!-- Simulation Canvas Container -->
+                    <!-- Shared Canvas Container -->
                     <div class="flex-grow relative h-full w-full sim-container bg-slate-800/20" id="canvas-container">
-                        <!-- Stats Overlay -->
-                        <div class="absolute top-4 right-4 p-4 bg-slate-900/80 rounded-lg text-xs font-mono border border-slate-700 pointer-events-none z-10 backdrop-blur-sm shadow-xl min-w-[200px]">
+                        
+                        <!-- Overlay Stats: Rolling -->
+                        <div id="stats-rolling" class="absolute top-4 right-4 p-4 bg-slate-900/80 rounded-lg text-xs font-mono border border-slate-700 pointer-events-none z-10 backdrop-blur-sm shadow-xl min-w-[200px]">
+                            <div class="flex justify-between text-emerald-400 font-bold mb-2 border-b border-slate-600 pb-1 gap-4">
+                                <span>Status</span> <span id="stat-state" class="text-white">Diam</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-400">
+                                <span>Kecepatan:</span> <span id="stat-vel" class="text-right text-slate-200">0.00 m/s</span>
+                                <span>Percepatan:</span> <span id="stat-acc" class="text-right text-slate-200">0.00 m/s²</span>
+                                <span>Gaya Gesek:</span> <span id="stat-f" class="text-right text-orange-400">0.0 N</span>
+                                <span class="text-white font-bold">Torsi:</span> <span id="stat-torque-roll" class="text-right text-white font-bold">0.0 Nm</span>
+                            </div>
+                        </div>
+
+                        <!-- Overlay Stats: Rigid -->
+                        <div id="stats-rigid" class="absolute top-4 right-4 p-4 bg-slate-900/80 rounded-lg text-xs font-mono border border-slate-700 pointer-events-none z-10 backdrop-blur-sm shadow-xl min-w-[200px] hidden">
+                            <div class="flex justify-between text-emerald-400 font-bold mb-2 border-b border-slate-600 pb-1 gap-4">
+                                <span>Status Sistem</span>
+                            </div>
                             <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-400">
                                 <span>Inersia (I):</span> <span id="stat-inertia" class="text-right text-slate-200">0.0</span>
                                 <span>Vel Sudut:</span> <span id="stat-omega" class="text-right text-slate-200">0.0</span>
                                 <span>Vel Linear:</span> <span id="stat-v" class="text-right text-purple-300">0.0</span>
-                                <span>Total Gaya:</span> <span id="stat-fnet" class="text-right text-white">0.0</span>
-                                <span class="font-bold text-white pt-1">Total Torsi:</span> <span id="stat-torque" class="text-right text-white font-bold pt-1">0.0</span>
+                                <span class="text-white font-bold">Total Torsi:</span> <span id="stat-torque-rigid" class="text-right text-white font-bold">0.0</span>
                             </div>
                         </div>
+
                         <canvas id="sim-canvas"></canvas>
                     </div>
 
