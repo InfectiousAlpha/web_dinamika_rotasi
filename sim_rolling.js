@@ -4,48 +4,26 @@
 
 export function initRollingSim(canvasId) {
     const canvas = document.getElementById(canvasId);
-    if (!canvas) {
-        console.warn("Canvas tidak ditemukan untuk Simulasi Rolling.");
-        return;
-    }
-    
-    // Cek apakah elemen kontrol untuk simulasi ini ada di HTML
-    const sliderG = document.getElementById('slider-g');
-    if (!sliderG) {
-        console.warn("Elemen kontrol untuk Simulasi Rolling tidak ditemukan. Pastikan HTML sesuai.");
-        return;
-    }
+    if (!canvas) return null;
 
     const ctx = canvas.getContext('2d');
     const PIXELS_PER_METER = 40;
     const CYLINDER_RADIUS = 25; 
 
-    let params = {
-        g: 9.8,
-        m: 5.0,
-        mu_s: 0.5,
-        mu_k: 0.3,
-        theta: 15.0
-    };
+    // Simulation Loop Variable
+    let animationFrameId;
+    let isActive = true;
 
-    let state = {
-        pos: 0.0, 
-        vel: 0.0, 
-        rotation_angle: 0.0,
-        lastTime: 0,
-        is_slipping: false
-    };
+    // --- State & Params ---
+    let params = { g: 9.8, m: 5.0, mu_s: 0.5, mu_k: 0.3, theta: 15.0 };
+    let state = { pos: 0.0, vel: 0.0, rotation_angle: 0.0, lastTime: 0, is_slipping: false };
+    let physics_output = { accel: 0, friction: 0, torque: 0, normal: 0, weight: 0, mode: "Diam" };
 
-    let physics_output = {
-        accel: 0, friction: 0, torque: 0, normal: 0, weight: 0, mode: "Diam"
-    };
-
-    // DOM Elements Binding
+    // --- DOM Elements ---
     const sliders = {
         g: document.getElementById('slider-g'),
         m: document.getElementById('slider-m'),
         mus: document.getElementById('slider-mus'),
-        muk: document.getElementById('slider-muk'),
         theta: document.getElementById('slider-theta')
     };
     
@@ -53,35 +31,44 @@ export function initRollingSim(canvasId) {
         g: document.getElementById('val-g'),
         m: document.getElementById('val-m'),
         mus: document.getElementById('val-mus'),
-        muk: document.getElementById('val-muk'),
         theta: document.getElementById('val-theta'),
-        state: document.getElementById('stat-state'), // Pastikan ID ini ada di HTML jika pakai sim ini
+        state: document.getElementById('stat-state'),
         vel: document.getElementById('stat-vel'),
         acc: document.getElementById('stat-acc'),
-        fg: document.getElementById('stat-fg'),
         f: document.getElementById('stat-f'),
-        torque: document.getElementById('stat-torque')
+        torque: document.getElementById('stat-torque-roll')
     };
 
     function updateParams() {
-        if(!sliders.g) return; // Guard
+        if(!sliders.g) return;
         params.g = parseFloat(sliders.g.value);
         params.m = parseFloat(sliders.m.value);
         params.mu_s = parseFloat(sliders.mus.value);
-        params.mu_k = parseFloat(sliders.muk.value);
         params.theta = parseFloat(sliders.theta.value);
-
-        // Update Text (Optional, check if element exists)
+        
+        // Simple display update
         if(displays.g) displays.g.textContent = params.g.toFixed(1) + " m/s²";
+        if(displays.m) displays.m.textContent = params.m.toFixed(1) + " kg";
+        if(displays.mus) displays.mus.textContent = params.mu_s.toFixed(2);
+        if(displays.theta) displays.theta.textContent = params.theta.toFixed(1) + "°";
     }
 
-    Object.values(sliders).forEach(s => { if(s) s.addEventListener('input', updateParams); });
-    
+    // Attach Listeners
+    const listeners = [];
+    Object.values(sliders).forEach(s => { 
+        if(s) {
+            s.addEventListener('input', updateParams);
+            listeners.push({ el: s, type: 'input', fn: updateParams });
+        }
+    });
+
     const btnReset = document.getElementById('btn-reset');
+    const resetFn = () => {
+        state.pos = 0; state.vel = 0; state.rotation_angle = 0;
+    };
     if(btnReset) {
-        btnReset.addEventListener('click', () => {
-            state.pos = 0; state.vel = 0; state.rotation_angle = 0;
-        });
+        btnReset.addEventListener('click', resetFn);
+        listeners.push({ el: btnReset, type: 'click', fn: resetFn });
     }
 
     // --- Physics Logic ---
@@ -90,14 +77,13 @@ export function initRollingSim(canvasId) {
         const fg = params.m * params.g;
         const fg_parallel = fg * Math.sin(rad);
         const fg_normal = fg * Math.cos(rad);
-        
         physics_output.weight = fg;
         physics_output.normal = fg_normal;
 
         const k = 0.5; // Silinder Pejal
         const f_req_rolling = (k * fg_parallel) / (1 + k);
         const f_max_static = params.mu_s * fg_normal;
-        const f_kinetic = params.mu_k * fg_normal;
+        const f_kinetic = 0.3 * fg_normal; // Simplified kinetic friction
 
         let accel = 0;
         let friction = 0;
@@ -137,32 +123,38 @@ export function initRollingSim(canvasId) {
         physics_output.torque = friction * 0.25;
     }
 
-    function drawArrow(ctx, startX, startY, endX, endY, color, label) {
+    function drawArrow(ctx, startX, startY, endX, endY, color) {
         if (Math.abs(startX - endX) < 1 && Math.abs(startY - endY) < 1) return;
         ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
         const angle = Math.atan2(endY - startY, endX - startX);
         const headLen = 10;
-        ctx.beginPath();
-        ctx.moveTo(endX, endY);
+        ctx.beginPath(); ctx.moveTo(endX, endY);
         ctx.lineTo(endX - headLen * Math.cos(angle - Math.PI/6), endY - headLen * Math.sin(angle - Math.PI/6));
         ctx.lineTo(endX - headLen * Math.cos(angle + Math.PI/6), endY - headLen * Math.sin(angle + Math.PI/6));
         ctx.fill();
     }
 
     function loop(timestamp) {
+        if (!isActive) return;
         if (!state.lastTime) state.lastTime = timestamp;
         const dt = Math.min((timestamp - state.lastTime) / 1000, 0.05);
         state.lastTime = timestamp;
 
         updatePhysics(dt);
 
-        // Rendering code (simplified for brevity)
-        if(canvas.width === 0) { // Resize safety
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
+        // Update UI
+        if(displays.state) {
+            displays.state.textContent = physics_output.mode;
+            displays.state.style.color = state.is_slipping ? '#f87171' : '#4ade80';
+            displays.vel.textContent = state.vel.toFixed(2) + " m/s";
+            displays.acc.textContent = physics_output.accel.toFixed(2) + " m/s²";
+            displays.f.textContent = physics_output.friction.toFixed(1) + " N";
+            displays.torque.textContent = physics_output.torque.toFixed(2) + " Nm";
         }
 
+        // Render
+        if(canvas.width === 0) { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const cx = canvas.width / 2;
         const cy = canvas.height / 2 + 100;
@@ -172,18 +164,14 @@ export function initRollingSim(canvasId) {
         ctx.translate(cx, cy);
         ctx.rotate(-rad);
 
-        // Draw Slope
+        // Slope
         ctx.fillStyle = "#3f3f46"; ctx.fillRect(-1000, 0, 2000, 400); 
         ctx.fillStyle = "#22c55e"; ctx.fillRect(-1000, 0, 2000, 4); 
 
-        // Draw Cylinder
-        const cylY = -CYLINDER_RADIUS;
+        // Ticks
+        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 2;
         const spacing = 100;
         const offset = (state.pos * PIXELS_PER_METER) % spacing;
-
-        // Ticks
-        ctx.strokeStyle = "rgba(255,255,255,0.3)";
-        ctx.lineWidth = 2;
         for(let i = -10; i < 10; i++) {
             let x = i * spacing - offset;
             if(x > -cx - 500 && x < cx + 500) {
@@ -191,6 +179,8 @@ export function initRollingSim(canvasId) {
             }
         }
 
+        // Cylinder
+        const cylY = -CYLINDER_RADIUS;
         ctx.translate(0, cylY); 
         ctx.save();
         ctx.rotate(state.rotation_angle); 
@@ -199,15 +189,23 @@ export function initRollingSim(canvasId) {
         ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(CYLINDER_RADIUS, 0); ctx.stroke();
         ctx.restore(); 
 
-        // Draw Vectors
+        // Vectors
         const scale = 3.0;
         drawArrow(ctx, 0, CYLINDER_RADIUS, -physics_output.friction * scale, CYLINDER_RADIUS, "#fb923c"); 
         drawArrow(ctx, 0, CYLINDER_RADIUS, 0, CYLINDER_RADIUS - physics_output.normal * scale, "#ffffff");
-        
+
         ctx.restore(); 
-        requestAnimationFrame(loop);
+        animationFrameId = requestAnimationFrame(loop);
     }
 
+    // Initialize
     updateParams();
-    requestAnimationFrame(loop);
+    animationFrameId = requestAnimationFrame(loop);
+
+    // Return Cleanup Function
+    return function stop() {
+        isActive = false;
+        cancelAnimationFrame(animationFrameId);
+        listeners.forEach(l => l.el.removeEventListener(l.type, l.fn));
+    };
 }
