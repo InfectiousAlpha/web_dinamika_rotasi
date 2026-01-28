@@ -1,6 +1,6 @@
 // ==========================================
 // MODUL SIMULASI 3: Sistem Banyak Partikel
-// ==========================================
+// ==========================================f
 
 export function initMultiParticleSim(canvasId) {
     const canvas = document.getElementById(canvasId);
