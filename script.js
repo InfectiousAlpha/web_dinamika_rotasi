@@ -3,29 +3,24 @@
 // Mengelola UI, Background, dan Pemilihan Simulasi
 // ==========================================
 
-import { initSingleParticleSim } from './sim_single_particle.js';
+import { initSingleParticleSim } from './sim_single_particle.js'; // FILE BARU
 import { initRigidSim } from './sim_rigid.js';
-import { initMultiParticleSim } from './sim_multi_particle.js'; // FILE BARU
 
 // --- State Manager ---
 let currentStopFn = null; 
 
 // --- UI Elements ---
-const tabSingle = document.getElementById('tab-single');
+const tabSingle = document.getElementById('tab-single'); // Ganti nama
 const tabRigid = document.getElementById('tab-rigid');
-const tabMulti = document.getElementById('tab-multi'); // New Tab
 
 const infoSingle = document.getElementById('info-single');
 const infoRigid = document.getElementById('info-rigid');
-const infoMulti = document.getElementById('info-multi'); // New Info
 
 const controlsSingle = document.getElementById('controls-single');
 const controlsRigid = document.getElementById('controls-rigid');
-const controlsMulti = document.getElementById('controls-multi'); // New Controls
 
 const statsSingle = document.getElementById('stats-single');
 const statsRigid = document.getElementById('stats-rigid');
-const statsMulti = document.getElementById('stats-multi'); // New Stats
 
 const simBorder = document.getElementById('sim-border-color');
 
@@ -44,70 +39,72 @@ function switchSim(simName) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    // 3. Reset Styles Helper
-    const resetTab = (el) => {
-        el.className = "px-6 py-3 rounded-full font-bold text-sm transition-all bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-white/10";
-    };
-    const activeTab = (el) => {
-        el.className = "px-6 py-3 rounded-full font-bold text-sm transition-all bg-green-600 text-white shadow-lg shadow-green-500/20";
-    };
-
-    resetTab(tabSingle);
-    resetTab(tabRigid);
-    resetTab(tabMulti);
-
-    infoSingle.classList.add('hidden');
-    infoRigid.classList.add('hidden');
-    infoMulti.classList.add('hidden');
-
-    controlsSingle.classList.add('hidden');
-    controlsRigid.classList.add('hidden');
-    controlsMulti.classList.add('hidden');
-
-    statsSingle.classList.add('hidden');
-    statsRigid.classList.add('hidden');
-    statsMulti.classList.add('hidden');
-
-    // 4. Activate Specific Sim
+    // 3. Toggle UI Class
     if (simName === 'single') {
-        activeTab(tabSingle);
+        // Active Single Particle UI
+        tabSingle.classList.replace('bg-slate-800', 'bg-green-600');
+        tabSingle.classList.replace('text-slate-400', 'text-white');
+        tabSingle.classList.add('shadow-lg');
+        
+        tabRigid.classList.replace('bg-green-600', 'bg-slate-800');
+        tabRigid.classList.replace('text-white', 'text-slate-400');
+        tabRigid.classList.remove('shadow-lg');
+
+        // Show/Hide Panels
         infoSingle.classList.remove('hidden');
+        infoRigid.classList.add('hidden');
+        
         controlsSingle.classList.remove('hidden');
+        controlsRigid.classList.add('hidden');
+
         statsSingle.classList.remove('hidden');
-        simBorder.className = "glass-panel p-8 rounded-2xl reveal active border-l-4 border-l-purple-500 relative overflow-hidden transition-all duration-500";
+        statsRigid.classList.add('hidden');
+
+        simBorder.classList.replace('border-l-teal-500', 'border-l-purple-500'); 
+
+        // Start Single Particle Sim
         currentStopFn = initSingleParticleSim('sim-canvas');
 
     } else if (simName === 'rigid') {
-        activeTab(tabRigid);
-        infoRigid.classList.remove('hidden');
-        controlsRigid.classList.remove('hidden');
-        statsRigid.classList.remove('hidden');
-        simBorder.className = "glass-panel p-8 rounded-2xl reveal active border-l-4 border-l-teal-500 relative overflow-hidden transition-all duration-500";
-        currentStopFn = initRigidSim('sim-canvas');
+        // Active Rigid UI
+        tabRigid.classList.replace('bg-slate-800', 'bg-green-600');
+        tabRigid.classList.replace('text-slate-400', 'text-white');
+        tabRigid.classList.add('shadow-lg');
 
-    } else if (simName === 'multi') {
-        activeTab(tabMulti);
-        infoMulti.classList.remove('hidden');
-        controlsMulti.classList.remove('hidden');
-        statsMulti.classList.remove('hidden');
-        simBorder.className = "glass-panel p-8 rounded-2xl reveal active border-l-4 border-l-indigo-500 relative overflow-hidden transition-all duration-500";
-        currentStopFn = initMultiParticleSim('sim-canvas');
+        tabSingle.classList.replace('bg-green-600', 'bg-slate-800');
+        tabSingle.classList.replace('text-white', 'text-slate-400');
+        tabSingle.classList.remove('shadow-lg');
+
+        // Show/Hide Panels
+        infoRigid.classList.remove('hidden');
+        infoSingle.classList.add('hidden');
+
+        controlsRigid.classList.remove('hidden');
+        controlsSingle.classList.add('hidden');
+
+        statsRigid.classList.remove('hidden');
+        statsSingle.classList.add('hidden');
+
+        simBorder.classList.replace('border-l-purple-500', 'border-l-teal-500'); 
+
+        // Start Rigid Sim
+        currentStopFn = initRigidSim('sim-canvas');
     }
 }
 
 // --- Event Listeners ---
 if(tabSingle) tabSingle.addEventListener('click', () => switchSim('single'));
 if(tabRigid) tabRigid.addEventListener('click', () => switchSim('rigid'));
-if(tabMulti) tabMulti.addEventListener('click', () => switchSim('multi'));
 
 // --- Initial Load ---
-switchSim('single'); 
+switchSim('single'); // Start with single particle
 
-// --- BACKGROUND EFFECT ---
+// --- BACKGROUND EFFECT (Sama seperti sebelumnya) ---
 const bgCanvas = document.getElementById('bg-canvas');
 if (bgCanvas) {
     const bgCtx = bgCanvas.getContext('2d');
-    let width, height, particles = [];
+    let width, height;
+    let particles = [];
 
     function resizeBg() {
         width = bgCanvas.width = window.innerWidth;
