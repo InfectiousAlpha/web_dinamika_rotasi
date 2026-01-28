@@ -4,33 +4,15 @@
 
 export function initRigidSim(canvasId) {
     const canvas = document.getElementById(canvasId);
-    if (!canvas) {
-        console.warn("Canvas tidak ditemukan untuk Simulasi Rigid Rotor.");
-        return;
-    }
-
-    // Cek apakah elemen kontrol untuk simulasi ini ada di HTML
-    const sliderM1 = document.getElementById('slider-m1');
-    if (!sliderM1) {
-        console.warn("Elemen kontrol (slider-m1) tidak ditemukan. Pastikan HTML diset untuk Rigid Rotor.");
-        return;
-    }
+    if (!canvas) return null;
 
     const ctx = canvas.getContext('2d');
+    let animationFrameId;
+    let isActive = true;
     
     // --- State & Params ---
-    let params = {
-        m1: 2.0, m2: 2.0, L: 150, f1: 0.0, f2: 0.0
-    };
-
-    let state = {
-        pos: { x: 0, y: 0 },
-        vel: { x: 0, y: 0 },
-        angle: 0,
-        angularVel: 0,
-        lastTime: 0
-    };
-
+    let params = { m1: 2.0, m2: 2.0, L: 150, f1: 0.0, f2: 0.0 };
+    let state = { pos: { x: 0, y: 0 }, vel: { x: 0, y: 0 }, angle: 0, angularVel: 0, lastTime: 0 };
     let physics_output = { inertia: 0, torque: 0, f_net_mag: 0 };
 
     // --- DOM Elements ---
@@ -50,8 +32,8 @@ export function initRigidSim(canvasId) {
         inertia: document.getElementById('stat-inertia'),
         omega: document.getElementById('stat-omega'),
         v: document.getElementById('stat-v'),
-        fnet: document.getElementById('stat-fnet'),
-        torque: document.getElementById('stat-torque')
+        fnet: document.getElementById('stat-fnet'), // Updated ID
+        torque: document.getElementById('stat-torque-rigid')
     };
 
     function updateParams() {
@@ -71,16 +53,22 @@ export function initRigidSim(canvasId) {
         }
     }
 
-    Object.values(sliders).forEach(s => { if(s) s.addEventListener('input', updateParams); });
-    
+    // Attach Listeners
+    const listeners = [];
+    Object.values(sliders).forEach(s => { 
+        if(s) {
+            s.addEventListener('input', updateParams);
+            listeners.push({ el: s, type: 'input', fn: updateParams });
+        }
+    });
+
     const btnReset = document.getElementById('btn-reset');
+    const resetFn = () => {
+        state.pos = { x: 0, y: 0 }; state.vel = { x: 0, y: 0 }; state.angle = 0; state.angularVel = 0;
+    };
     if(btnReset) {
-        btnReset.addEventListener('click', () => {
-            state.pos = { x: 0, y: 0 };
-            state.vel = { x: 0, y: 0 };
-            state.angle = 0;
-            state.angularVel = 0;
-        });
+        btnReset.addEventListener('click', resetFn);
+        listeners.push({ el: btnReset, type: 'click', fn: resetFn });
     }
 
     // --- Physics Logic ---
@@ -118,9 +106,7 @@ export function initRigidSim(canvasId) {
         state.angle += state.angularVel * dt;
 
         // Boundary Bounce
-        const w = canvas.width / 2;
-        const h = canvas.height / 2;
-        const margin = 50;
+        const w = canvas.width / 2; const h = canvas.height / 2; const margin = 50;
         if (state.pos.x > w - margin) { state.pos.x = w - margin; state.vel.x *= -0.8; }
         if (state.pos.x < -w + margin) { state.pos.x = -w + margin; state.vel.x *= -0.8; }
         if (state.pos.y > h - margin) { state.pos.y = h - margin; state.vel.y *= -0.8; }
@@ -136,17 +122,16 @@ export function initRigidSim(canvasId) {
 
         ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
-
         const arrowAngle = Math.atan2(endY - startY, endX - startX);
         const headLen = 8;
-        ctx.beginPath();
-        ctx.moveTo(endX, endY);
+        ctx.beginPath(); ctx.moveTo(endX, endY);
         ctx.lineTo(endX - headLen * Math.cos(arrowAngle - Math.PI/6), endY - headLen * Math.sin(arrowAngle - Math.PI/6));
         ctx.lineTo(endX - headLen * Math.cos(arrowAngle + Math.PI/6), endY - headLen * Math.sin(arrowAngle + Math.PI/6));
         ctx.fill();
     }
 
     function loop(timestamp) {
+        if (!isActive) return;
         if (!state.lastTime) state.lastTime = timestamp;
         const dt = Math.min((timestamp - state.lastTime) / 1000, 0.05);
         state.lastTime = timestamp;
@@ -161,11 +146,7 @@ export function initRigidSim(canvasId) {
             displays.torque.textContent = physics_output.torque.toFixed(1);
         }
 
-        if(canvas.width === 0) {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-        }
-
+        if(canvas.width === 0) { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
@@ -193,9 +174,15 @@ export function initRigidSim(canvasId) {
         ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
         
         ctx.restore();
-        requestAnimationFrame(loop);
+        animationFrameId = requestAnimationFrame(loop);
     }
 
     updateParams();
-    requestAnimationFrame(loop);
+    animationFrameId = requestAnimationFrame(loop);
+
+    return function stop() {
+        isActive = false;
+        cancelAnimationFrame(animationFrameId);
+        listeners.forEach(l => l.el.removeEventListener(l.type, l.fn));
+    };
 }
