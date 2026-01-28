@@ -1,7 +1,3 @@
-// ==========================================
-// MODUL SIMULASI 2: Rigid Rotor (2 Partikel)
-// ==========================================
-
 export function initRigidSim(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
@@ -10,12 +6,12 @@ export function initRigidSim(canvasId) {
     let animationFrameId;
     let isActive = true;
     
-    // --- State & Params ---
+    // Params
     let params = { m1: 2.0, m2: 2.0, L: 150, f1: 0.0, f2: 0.0 };
     let state = { pos: { x: 0, y: 0 }, vel: { x: 0, y: 0 }, angle: 0, angularVel: 0, lastTime: 0 };
     let physics_output = { inertia: 0, torque: 0, f_net_mag: 0 };
 
-    // --- DOM Elements ---
+    // Elements
     const sliders = {
         m1: document.getElementById('slider-m1'),
         m2: document.getElementById('slider-m2'),
@@ -32,7 +28,6 @@ export function initRigidSim(canvasId) {
         inertia: document.getElementById('stat-inertia'),
         omega: document.getElementById('stat-omega'),
         v: document.getElementById('stat-v'),
-        fnet: document.getElementById('stat-fnet'), // Updated ID
         torque: document.getElementById('stat-torque-rigid')
     };
 
@@ -53,7 +48,6 @@ export function initRigidSim(canvasId) {
         }
     }
 
-    // Attach Listeners
     const listeners = [];
     Object.values(sliders).forEach(s => { 
         if(s) {
@@ -71,7 +65,6 @@ export function initRigidSim(canvasId) {
         listeners.push({ el: btnReset, type: 'click', fn: resetFn });
     }
 
-    // --- Physics Logic ---
     function updatePhysics(dt) {
         const M = params.m1 + params.m2;
         const r1 = (params.m2 / M) * params.L;
@@ -142,11 +135,14 @@ export function initRigidSim(canvasId) {
             displays.inertia.textContent = physics_output.inertia.toFixed(0);
             displays.omega.textContent = state.angularVel.toFixed(2);
             displays.v.textContent = (Math.sqrt(state.vel.x**2 + state.vel.y**2) * 10).toFixed(1);
-            displays.fnet.textContent = physics_output.f_net_mag.toFixed(1);
             displays.torque.textContent = physics_output.torque.toFixed(1);
         }
 
-        if(canvas.width === 0) { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; }
+        if(canvas.width === 0 || canvas.width !== canvas.parentElement.clientWidth) { 
+            canvas.width = canvas.parentElement.clientWidth; 
+            canvas.height = canvas.parentElement.clientHeight; 
+        }
+        
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
