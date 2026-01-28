@@ -67,12 +67,13 @@ export function initRollingSim(canvasId) {
     function updatePhysics(dt) {
         const rad = params.theta * Math.PI / 180;
         const fg = params.m * params.g;
+        // Gravitasi menarik ke bawah bidang miring (positif X lokal)
         const fg_parallel = fg * Math.sin(rad);
         const fg_normal = fg * Math.cos(rad);
         physics_output.weight = fg;
         physics_output.normal = fg_normal;
 
-        const k = 0.5; 
+        const k = 0.5; // Momen Inersia Silinder Pejal (1/2 MR^2) -> k=0.5
         const f_req_rolling = (k * fg_parallel) / (1 + k);
         const f_max_static = params.mu_s * fg_normal;
         const f_kinetic = 0.3 * fg_normal; 
@@ -82,11 +83,13 @@ export function initRollingSim(canvasId) {
 
         if (params.theta > 0.1) {
             if (f_req_rolling <= f_max_static) {
+                // Menggelinding Murni
                 state.is_slipping = false;
                 friction = f_req_rolling;
                 accel = (params.g * Math.sin(rad)) / (1 + k);
                 physics_output.mode = "Menggelinding Murni";
             } else {
+                // Tergelincir (Slip)
                 state.is_slipping = true;
                 friction = f_kinetic;
                 accel = (fg_parallel - friction) / params.m;
@@ -102,10 +105,12 @@ export function initRollingSim(canvasId) {
 
         const R_physics = 1.0; 
         if (state.is_slipping) {
+            // Torsi penyebab rotasi hanya dari gaya gesek kinetis
             const alpha = (2 * friction) / (params.m * R_physics);
-            const current_omega = (state.vel / R_physics) * 0.5;
+            const current_omega = (state.vel / R_physics) * 0.5; // Aproksimasi visual
             state.rotation_angle += (current_omega + alpha * dt) * dt * 5; 
         } else {
+            // V = omega * R -> dTheta = dPos / R
             const dPosPixels = (state.vel * dt) * PIXELS_PER_METER;
             state.rotation_angle += dPosPixels / CYLINDER_RADIUS;
         }
@@ -151,42 +156,64 @@ export function initRollingSim(canvasId) {
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const cx = canvas.width / 2;
-        const cy = canvas.height / 2 + 100;
+        // Posisi Y disesuaikan agar saat miring tidak terlalu ke bawah
+        const cy = canvas.height / 2 - 50; 
         const rad = params.theta * Math.PI / 180;
 
         ctx.save();
         ctx.translate(cx, cy);
-        ctx.rotate(-rad);
+        
+        // PERBAIKAN DI SINI: Rotasi positif agar bidang miring "turun" ke kanan
+        ctx.rotate(rad); 
 
-        // Slope
+        // Slope (Lantai)
         ctx.fillStyle = "#3f3f46"; ctx.fillRect(-1000, 0, 2000, 400); 
         ctx.fillStyle = "#22c55e"; ctx.fillRect(-1000, 0, 2000, 4); 
 
-        // Ticks
+        // Ticks (Garis jarak)
         ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 2;
         const spacing = 100;
         const offset = (state.pos * PIXELS_PER_METER) % spacing;
-        for(let i = -10; i < 10; i++) {
+        
+        // Render tick marks yang bergerak
+        ctx.beginPath();
+        for(let i = -15; i < 15; i++) {
             let x = i * spacing - offset;
-            if(x > -cx - 500 && x < cx + 500) {
-                ctx.beginPath(); ctx.moveTo(x, 4); ctx.lineTo(x, 14); ctx.stroke();
+            // Hanya gambar jika dalam jangkauan pandang
+            if(x > -1000 && x < 1000) {
+                ctx.moveTo(x, 4); 
+                ctx.lineTo(x, 14); 
             }
         }
+        ctx.stroke();
 
-        // Cylinder
+        // Menggambar Silinder (Diam di tengah layar, lantai yang bergerak)
+        // Atau Silinder yang bergerak? Di sini logikanya: Kamera mengikuti silinder (silinder di cx, cy)
+        // Jadi kita tidak mengubah translate x silinder, tapi kita menggeser texture lantai (offset).
+        
         const cylY = -CYLINDER_RADIUS;
         ctx.translate(0, cylY); 
+        
         ctx.save();
-        ctx.rotate(state.rotation_angle); 
+        ctx.rotate(state.rotation_angle); // Rotasi silinder itu sendiri
+        
+        // Body Silinder
         ctx.fillStyle = "#3b82f6"; ctx.strokeStyle = "white"; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(0, 0, CYLINDER_RADIUS, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-        ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(CYLINDER_RADIUS, 0); ctx.stroke();
+        
+        // Garis jari-jari untuk visualisasi putaran
+        ctx.strokeStyle = "rgba(255,255,255,0.8)"; 
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(CYLINDER_RADIUS, 0); ctx.stroke();
         ctx.restore(); 
 
-        // Vectors
+        // Vektor Gaya (Tidak ikut berputar dengan silinder)
         const scale = 3.0;
+        // Gaya Gesek (melawan gerak, ke kiri/atas bidang)
         drawArrow(ctx, 0, CYLINDER_RADIUS, -physics_output.friction * scale, CYLINDER_RADIUS, "#fb923c"); 
+        // Gaya Normal (tegak lurus bidang)
         drawArrow(ctx, 0, CYLINDER_RADIUS, 0, CYLINDER_RADIUS - physics_output.normal * scale, "#ffffff");
+        // Vektor Berat (seharusnya tegak lurus ke bawah global, tapi di sini kita gambar komponen mg sin theta untuk simplifikasi visual gaya dorong)
+        // drawArrow(ctx, 0, 0, params.m * params.g * Math.sin(rad) * scale, 0, "#ef4444"); // Opsional
 
         ctx.restore(); 
         animationFrameId = requestAnimationFrame(loop);
