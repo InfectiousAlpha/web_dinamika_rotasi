@@ -5,7 +5,8 @@
 
 import { initSingleParticleSim } from './sim_single_particle.js'; 
 import { initRigidSim } from './sim_rigid.js';
-import { initMultiParticleSim } from './sim_multi_particle.js'; // Added Import
+import { initMultiParticleSim } from './sim_multi_particle.js';
+import { initRodApproxSim } from './sim_rod_approx.js'; // IMPORT BARU
 
 // --- State Manager ---
 let currentStopFn = null; 
@@ -13,19 +14,23 @@ let currentStopFn = null;
 // --- UI Elements ---
 const tabSingle = document.getElementById('tab-single');
 const tabRigid = document.getElementById('tab-rigid');
-const tabMulti = document.getElementById('tab-multi'); // Added Tab
+const tabMulti = document.getElementById('tab-multi');
+const tabApprox = document.getElementById('tab-approx'); // TAB BARU
 
 const infoSingle = document.getElementById('info-single');
 const infoRigid = document.getElementById('info-rigid');
-const infoMulti = document.getElementById('info-multi'); // Added Info
+const infoMulti = document.getElementById('info-multi');
+const infoApprox = document.getElementById('info-approx'); // INFO BARU
 
 const controlsSingle = document.getElementById('controls-single');
 const controlsRigid = document.getElementById('controls-rigid');
-const controlsMulti = document.getElementById('controls-multi'); // Added Controls
+const controlsMulti = document.getElementById('controls-multi');
+const controlsApprox = document.getElementById('controls-approx'); // CONTROLS BARU
 
 const statsSingle = document.getElementById('stats-single');
 const statsRigid = document.getElementById('stats-rigid');
-const statsMulti = document.getElementById('stats-multi'); // Added Stats
+const statsMulti = document.getElementById('stats-multi');
+const statsApprox = document.getElementById('stats-approx'); // STATS BARU
 
 const simBorder = document.getElementById('sim-border-color');
 
@@ -46,11 +51,13 @@ function switchSim(simName) {
 
     // 3. Reset UI Styles (Helper Function)
     function resetTab(tab) {
+        if(!tab) return;
         tab.classList.replace('bg-green-600', 'bg-slate-800');
         tab.classList.replace('text-white', 'text-slate-400');
         tab.classList.remove('shadow-lg');
     }
     function activeTab(tab) {
+        if(!tab) return;
         tab.classList.replace('bg-slate-800', 'bg-green-600');
         tab.classList.replace('text-slate-400', 'text-white');
         tab.classList.add('shadow-lg');
@@ -58,19 +65,23 @@ function switchSim(simName) {
 
     resetTab(tabSingle);
     resetTab(tabRigid);
-    if(tabMulti) resetTab(tabMulti);
+    resetTab(tabMulti);
+    resetTab(tabApprox);
 
-    infoSingle.classList.add('hidden');
-    infoRigid.classList.add('hidden');
-    infoMulti.classList.add('hidden');
+    if(infoSingle) infoSingle.classList.add('hidden');
+    if(infoRigid) infoRigid.classList.add('hidden');
+    if(infoMulti) infoMulti.classList.add('hidden');
+    if(infoApprox) infoApprox.classList.add('hidden');
 
-    controlsSingle.classList.add('hidden');
-    controlsRigid.classList.add('hidden');
-    controlsMulti.classList.add('hidden');
+    if(controlsSingle) controlsSingle.classList.add('hidden');
+    if(controlsRigid) controlsRigid.classList.add('hidden');
+    if(controlsMulti) controlsMulti.classList.add('hidden');
+    if(controlsApprox) controlsApprox.classList.add('hidden');
 
-    statsSingle.classList.add('hidden');
-    statsRigid.classList.add('hidden');
-    statsMulti.classList.add('hidden');
+    if(statsSingle) statsSingle.classList.add('hidden');
+    if(statsRigid) statsRigid.classList.add('hidden');
+    if(statsMulti) statsMulti.classList.add('hidden');
+    if(statsApprox) statsApprox.classList.add('hidden');
 
     // 4. Activate Specific Sim
     if (simName === 'single') {
@@ -78,9 +89,8 @@ function switchSim(simName) {
         infoSingle.classList.remove('hidden');
         controlsSingle.classList.remove('hidden');
         statsSingle.classList.remove('hidden');
-        simBorder.classList.remove('border-l-teal-500', 'border-l-indigo-500'); 
-        simBorder.classList.add('border-l-purple-500'); 
-
+        simBorder.className = "glass-panel p-8 rounded-2xl reveal active border-l-4 relative overflow-hidden transition-all duration-500 border-l-purple-500"; 
+        
         currentStopFn = initSingleParticleSim('sim-canvas');
 
     } else if (simName === 'rigid') {
@@ -88,20 +98,27 @@ function switchSim(simName) {
         infoRigid.classList.remove('hidden');
         controlsRigid.classList.remove('hidden');
         statsRigid.classList.remove('hidden');
-        simBorder.classList.remove('border-l-purple-500', 'border-l-indigo-500'); 
-        simBorder.classList.add('border-l-teal-500'); 
+        simBorder.className = "glass-panel p-8 rounded-2xl reveal active border-l-4 relative overflow-hidden transition-all duration-500 border-l-teal-500"; 
 
         currentStopFn = initRigidSim('sim-canvas');
 
     } else if (simName === 'multi') {
-        if(tabMulti) activeTab(tabMulti);
+        activeTab(tabMulti);
         infoMulti.classList.remove('hidden');
         controlsMulti.classList.remove('hidden');
         statsMulti.classList.remove('hidden');
-        simBorder.classList.remove('border-l-purple-500', 'border-l-teal-500'); 
-        simBorder.classList.add('border-l-indigo-500'); 
+        simBorder.className = "glass-panel p-8 rounded-2xl reveal active border-l-4 relative overflow-hidden transition-all duration-500 border-l-indigo-500"; 
 
         currentStopFn = initMultiParticleSim('sim-canvas');
+        
+    } else if (simName === 'approx') { // LOGIKA BARU
+        activeTab(tabApprox);
+        infoApprox.classList.remove('hidden');
+        controlsApprox.classList.remove('hidden');
+        statsApprox.classList.remove('hidden');
+        simBorder.className = "glass-panel p-8 rounded-2xl reveal active border-l-4 relative overflow-hidden transition-all duration-500 border-l-rose-500"; 
+
+        currentStopFn = initRodApproxSim('sim-canvas');
     }
 }
 
@@ -109,11 +126,12 @@ function switchSim(simName) {
 if(tabSingle) tabSingle.addEventListener('click', () => switchSim('single'));
 if(tabRigid) tabRigid.addEventListener('click', () => switchSim('rigid'));
 if(tabMulti) tabMulti.addEventListener('click', () => switchSim('multi'));
+if(tabApprox) tabApprox.addEventListener('click', () => switchSim('approx')); // LISTENER BARU
 
 // --- Initial Load ---
-switchSim('single'); // Start with single particle
+switchSim('single'); 
 
-// --- BACKGROUND EFFECT (Keep as is) ---
+// --- BACKGROUND EFFECT ---
 const bgCanvas = document.getElementById('bg-canvas');
 if (bgCanvas) {
     const bgCtx = bgCanvas.getContext('2d');
