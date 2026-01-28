@@ -6,8 +6,8 @@ export function initRigidSim(canvasId) {
     let animationFrameId;
     let isActive = true;
     
-    // Params
-    let params = { m1: 2.0, m2: 2.0, L: 150, f1: 0.0, f2: 0.0 };
+    // Params (Added damping)
+    let params = { m1: 2.0, m2: 2.0, L: 150, f1: 0.0, f2: 0.0, damping: 0.0 };
     let state = { pos: { x: 0, y: 0 }, vel: { x: 0, y: 0 }, angle: 0, angularVel: 0, lastTime: 0 };
     let physics_output = { inertia: 0, torque: 0, f_net_mag: 0 };
 
@@ -16,6 +16,7 @@ export function initRigidSim(canvasId) {
         m1: document.getElementById('slider-m1'),
         m2: document.getElementById('slider-m2'),
         len: document.getElementById('slider-len'),
+        damping: document.getElementById('slider-damping'), // New Element
         f1: document.getElementById('slider-f1'),
         f2: document.getElementById('slider-f2')
     };
@@ -23,6 +24,7 @@ export function initRigidSim(canvasId) {
         m1: document.getElementById('val-m1'),
         m2: document.getElementById('val-m2'),
         len: document.getElementById('val-len'),
+        damping: document.getElementById('val-damping'), // New Display
         f1: document.getElementById('val-f1'),
         f2: document.getElementById('val-f2'),
         inertia: document.getElementById('stat-inertia'),
@@ -36,6 +38,7 @@ export function initRigidSim(canvasId) {
         params.m1 = parseFloat(sliders.m1.value);
         params.m2 = parseFloat(sliders.m2.value);
         params.L = parseFloat(sliders.len.value);
+        params.damping = parseFloat(sliders.damping.value); // Read damping
         params.f1 = parseFloat(sliders.f1.value);
         params.f2 = parseFloat(sliders.f2.value);
 
@@ -43,6 +46,7 @@ export function initRigidSim(canvasId) {
             displays.m1.textContent = params.m1.toFixed(1) + " kg";
             displays.m2.textContent = params.m2.toFixed(1) + " kg";
             displays.len.textContent = params.L.toFixed(0) + " px";
+            displays.damping.textContent = params.damping.toFixed(2); // Update display
             displays.f1.textContent = params.f1.toFixed(1) + " N";
             displays.f2.textContent = params.f2.toFixed(1) + " N";
         }
@@ -92,24 +96,20 @@ export function initRigidSim(canvasId) {
         const ax = F_net_x / M;
         const ay = F_net_y / M;
         
-        // PERBAIKAN: Hilangkan drag (gesekan udara) agar sesuai Hukum Newton I
-        // Benda akan terus bergerak konstan jika resultan gaya 0
-        const drag = 1.0; 
+        // HITUNG DRAG FACTOR BERDASARKAN SLIDER
+        // Jika damping 0 -> factor 1.0 (Inersia Murni)
+        // Jika damping 1 -> factor berkurang (Perlambatan)
+        const dragFactor = 1.0 - (params.damping * 0.05); // Max 5% loss per tick
         
-        state.vel.x = (state.vel.x + ax * dt) * drag;
-        state.vel.y = (state.vel.y + ay * dt) * drag;
+        state.vel.x = (state.vel.x + ax * dt) * dragFactor;
+        state.vel.y = (state.vel.y + ay * dt) * dragFactor;
         state.pos.x += state.vel.x * dt * 10;
         state.pos.y += state.vel.y * dt * 10;
 
         // Rotational Motion (Tau = I * alpha)
         const alpha = torque / I * 500; // Scaling factor for visual speed
         
-        // PERBAIKAN UTAMA:
-        // Sebelumnya ada 'rotDrag = 0.98' yang membuat putaran melambat sendiri.
-        // Sekarang diubah jadi 1.0 (Inersia Murni).
-        const rotDrag = 1.0; 
-        
-        state.angularVel = (state.angularVel + alpha * dt) * rotDrag;
+        state.angularVel = (state.angularVel + alpha * dt) * dragFactor;
         state.angle += state.angularVel * dt;
 
         // Boundary Bounce (Pantulan dinding)
