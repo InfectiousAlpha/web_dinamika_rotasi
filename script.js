@@ -7,41 +7,33 @@ import { initRollingSim } from './sim_rolling.js';
 import { initRigidSim } from './sim_rigid.js';
 
 // --- State Manager ---
-let currentStopFn = null; // Menyimpan fungsi 'stop' dari simulasi yang sedang berjalan
+let currentStopFn = null; 
 
 // --- UI Elements ---
 const tabRolling = document.getElementById('tab-rolling');
 const tabRigid = document.getElementById('tab-rigid');
-
 const infoRolling = document.getElementById('info-rolling');
 const infoRigid = document.getElementById('info-rigid');
-
 const controlsRolling = document.getElementById('controls-rolling');
 const controlsRigid = document.getElementById('controls-rigid');
-
 const statsRolling = document.getElementById('stats-rolling');
 const statsRigid = document.getElementById('stats-rigid');
-
 const simBorder = document.getElementById('sim-border-color');
 
 // --- Switch Logic ---
 function switchSim(simName) {
-    // 1. Hentikan simulasi sebelumnya jika ada
     if (currentStopFn) {
         currentStopFn();
         currentStopFn = null;
     }
 
-    // 2. Bersihkan Canvas (Visual reset)
     const canvas = document.getElementById('sim-canvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    // 3. Toggle UI Class
     if (simName === 'rolling') {
-        // Active Rolling UI
         tabRolling.classList.replace('bg-slate-800', 'bg-green-600');
         tabRolling.classList.replace('text-slate-400', 'text-white');
         tabRolling.classList.add('shadow-lg');
@@ -50,7 +42,6 @@ function switchSim(simName) {
         tabRigid.classList.replace('text-white', 'text-slate-400');
         tabRigid.classList.remove('shadow-lg');
 
-        // Show/Hide Panels
         infoRolling.classList.remove('hidden');
         infoRigid.classList.add('hidden');
         
@@ -60,13 +51,10 @@ function switchSim(simName) {
         statsRolling.classList.remove('hidden');
         statsRigid.classList.add('hidden');
 
-        simBorder.classList.replace('border-l-teal-500', 'border-l-purple-500'); // Optional color styling
-
-        // Start Rolling Sim
+        simBorder.classList.replace('border-l-teal-500', 'border-l-purple-500'); 
         currentStopFn = initRollingSim('sim-canvas');
 
     } else if (simName === 'rigid') {
-        // Active Rigid UI
         tabRigid.classList.replace('bg-slate-800', 'bg-green-600');
         tabRigid.classList.replace('text-slate-400', 'text-white');
         tabRigid.classList.add('shadow-lg');
@@ -75,7 +63,6 @@ function switchSim(simName) {
         tabRolling.classList.replace('text-white', 'text-slate-400');
         tabRolling.classList.remove('shadow-lg');
 
-        // Show/Hide Panels
         infoRigid.classList.remove('hidden');
         infoRolling.classList.add('hidden');
 
@@ -86,30 +73,19 @@ function switchSim(simName) {
         statsRolling.classList.add('hidden');
 
         simBorder.classList.replace('border-l-purple-500', 'border-l-teal-500'); 
-
-        // Start Rigid Sim
         currentStopFn = initRigidSim('sim-canvas');
     }
 }
 
 // --- Event Listeners ---
-tabRolling.addEventListener('click', () => switchSim('rolling'));
-tabRigid.addEventListener('click', () => switchSim('rigid'));
+if(tabRolling) tabRolling.addEventListener('click', () => switchSim('rolling'));
+if(tabRigid) tabRigid.addEventListener('click', () => switchSim('rigid'));
 
-// --- Initial Load ---
-// Mulai dengan Simulasi 1
-switchSim('rolling');
-
-
-// ==========================================
-// BACKGROUND & SCROLL EFFECT (SHARED)
-// ==========================================
-
+// --- Background Effect ---
 const bgCanvas = document.getElementById('bg-canvas');
 if (bgCanvas) {
     const bgCtx = bgCanvas.getContext('2d');
-    let width, height;
-    let particles = [];
+    let width, height, particles = [];
 
     function resizeBg() {
         width = bgCanvas.width = window.innerWidth;
@@ -160,15 +136,20 @@ if (bgCanvas) {
         });
         requestAnimationFrame(animateParticles);
     }
-
     window.addEventListener('resize', resizeBg);
     resizeBg();
     animateParticles();
 }
 
+// --- Scroll Reveal ---
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.add('active');
     });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// --- Start ---
+window.onload = function() {
+    switchSim('rolling');
+};
