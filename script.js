@@ -3,89 +3,108 @@
 // Mengelola UI, Background, dan Pemilihan Simulasi
 // ==========================================
 
-import { initRollingSim } from './sim_rolling.js';
+import { initSingleParticleSim } from './sim_single_particle.js'; // FILE BARU
 import { initRigidSim } from './sim_rigid.js';
 
 // --- State Manager ---
 let currentStopFn = null; 
 
 // --- UI Elements ---
-const tabRolling = document.getElementById('tab-rolling');
+const tabSingle = document.getElementById('tab-single'); // Ganti nama
 const tabRigid = document.getElementById('tab-rigid');
-const infoRolling = document.getElementById('info-rolling');
+
+const infoSingle = document.getElementById('info-single');
 const infoRigid = document.getElementById('info-rigid');
-const controlsRolling = document.getElementById('controls-rolling');
+
+const controlsSingle = document.getElementById('controls-single');
 const controlsRigid = document.getElementById('controls-rigid');
-const statsRolling = document.getElementById('stats-rolling');
+
+const statsSingle = document.getElementById('stats-single');
 const statsRigid = document.getElementById('stats-rigid');
+
 const simBorder = document.getElementById('sim-border-color');
 
 // --- Switch Logic ---
 function switchSim(simName) {
+    // 1. Hentikan simulasi sebelumnya
     if (currentStopFn) {
         currentStopFn();
         currentStopFn = null;
     }
 
+    // 2. Bersihkan Canvas
     const canvas = document.getElementById('sim-canvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    if (simName === 'rolling') {
-        tabRolling.classList.replace('bg-slate-800', 'bg-green-600');
-        tabRolling.classList.replace('text-slate-400', 'text-white');
-        tabRolling.classList.add('shadow-lg');
+    // 3. Toggle UI Class
+    if (simName === 'single') {
+        // Active Single Particle UI
+        tabSingle.classList.replace('bg-slate-800', 'bg-green-600');
+        tabSingle.classList.replace('text-slate-400', 'text-white');
+        tabSingle.classList.add('shadow-lg');
         
         tabRigid.classList.replace('bg-green-600', 'bg-slate-800');
         tabRigid.classList.replace('text-white', 'text-slate-400');
         tabRigid.classList.remove('shadow-lg');
 
-        infoRolling.classList.remove('hidden');
+        // Show/Hide Panels
+        infoSingle.classList.remove('hidden');
         infoRigid.classList.add('hidden');
         
-        controlsRolling.classList.remove('hidden');
+        controlsSingle.classList.remove('hidden');
         controlsRigid.classList.add('hidden');
 
-        statsRolling.classList.remove('hidden');
+        statsSingle.classList.remove('hidden');
         statsRigid.classList.add('hidden');
 
         simBorder.classList.replace('border-l-teal-500', 'border-l-purple-500'); 
-        currentStopFn = initRollingSim('sim-canvas');
+
+        // Start Single Particle Sim
+        currentStopFn = initSingleParticleSim('sim-canvas');
 
     } else if (simName === 'rigid') {
+        // Active Rigid UI
         tabRigid.classList.replace('bg-slate-800', 'bg-green-600');
         tabRigid.classList.replace('text-slate-400', 'text-white');
         tabRigid.classList.add('shadow-lg');
 
-        tabRolling.classList.replace('bg-green-600', 'bg-slate-800');
-        tabRolling.classList.replace('text-white', 'text-slate-400');
-        tabRolling.classList.remove('shadow-lg');
+        tabSingle.classList.replace('bg-green-600', 'bg-slate-800');
+        tabSingle.classList.replace('text-white', 'text-slate-400');
+        tabSingle.classList.remove('shadow-lg');
 
+        // Show/Hide Panels
         infoRigid.classList.remove('hidden');
-        infoRolling.classList.add('hidden');
+        infoSingle.classList.add('hidden');
 
         controlsRigid.classList.remove('hidden');
-        controlsRolling.classList.add('hidden');
+        controlsSingle.classList.add('hidden');
 
         statsRigid.classList.remove('hidden');
-        statsRolling.classList.add('hidden');
+        statsSingle.classList.add('hidden');
 
         simBorder.classList.replace('border-l-purple-500', 'border-l-teal-500'); 
+
+        // Start Rigid Sim
         currentStopFn = initRigidSim('sim-canvas');
     }
 }
 
 // --- Event Listeners ---
-if(tabRolling) tabRolling.addEventListener('click', () => switchSim('rolling'));
+if(tabSingle) tabSingle.addEventListener('click', () => switchSim('single'));
 if(tabRigid) tabRigid.addEventListener('click', () => switchSim('rigid'));
 
-// --- Background Effect ---
+// --- Initial Load ---
+switchSim('single'); // Start with single particle
+
+// --- BACKGROUND EFFECT (Sama seperti sebelumnya) ---
 const bgCanvas = document.getElementById('bg-canvas');
 if (bgCanvas) {
     const bgCtx = bgCanvas.getContext('2d');
-    let width, height, particles = [];
+    let width, height;
+    let particles = [];
 
     function resizeBg() {
         width = bgCanvas.width = window.innerWidth;
@@ -136,20 +155,15 @@ if (bgCanvas) {
         });
         requestAnimationFrame(animateParticles);
     }
+
     window.addEventListener('resize', resizeBg);
     resizeBg();
     animateParticles();
 }
 
-// --- Scroll Reveal ---
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.add('active');
     });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-// --- Start ---
-window.onload = function() {
-    switchSim('rolling');
-};
