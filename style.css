@@ -34,26 +34,6 @@ body {
     transform: translateY(0);
 }
 
-/* 3D Card Hover Effect */
-.tilt-card {
-    transition: transform 0.1s ease-out;
-    transform-style: preserve-3d;
-    perspective: 1000px;
-}
-
-.tilt-content {
-    transform: translateZ(20px);
-}
-
-.timeline-line {
-    position: absolute;
-    left: 0;
-    top: 10px;
-    bottom: 0;
-    width: 2px;
-    background: rgba(34, 197, 94, 0.2);
-}
-
 /* Simulation Specific Styles */
 input[type=range] {
     -webkit-appearance: none;
@@ -84,10 +64,4 @@ input[type=range]::-webkit-slider-runnable-track {
     display: block;
     width: 100%;
     height: 100%;
-}
-
-/* Formula styling */
-.formula {
-    font-family: 'Times New Roman', serif;
-    font-style: italic;
 }
