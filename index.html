@@ -93,15 +93,15 @@
                 Mekanika Benda Tegar
             </div>
             <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1]">
-                Memahami Fisika <br>
-                <span class="text-gradient">Gerak Rotasi</span>
+                Simulasi <br>
+                <span class="text-gradient">Rigid Rotor 2D</span>
             </h1>
             <p class="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-                Pelajari bagaimana gaya menyebabkan benda berputar (Torsi), ketahanan benda terhadap putaran (Inersia), dan konservasi Momentum Sudut dalam sistem fisika.
+                Pelajari bagaimana gaya menyebabkan translasi dan rotasi pada sistem dua partikel yang terhubung batang kaku.
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="#simulasi" class="w-full sm:w-auto px-8 py-4 rounded-full bg-green-600 hover:bg-green-500 text-white font-semibold transition-all hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.5)] hover:-translate-y-1">
-                    Coba Simulasi
+                    Mulai Simulasi
                 </a>
                 <a href="#konsep" class="w-full sm:w-auto px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold transition-all backdrop-blur-sm flex items-center justify-center gap-2 group hover:-translate-y-1">
                     <span>Pelajari Teori</span>
@@ -118,10 +118,10 @@
                     <span class="font-bold text-lg formula">L = Iω</span>
                 </div>
                 <div class="flex items-center gap-2 hover:grayscale-0 transition-all duration-300 hover:text-blue-400">
-                    <span class="font-bold text-lg formula">Ek = ½Iω²</span>
+                    <span class="font-bold text-lg formula">I = Σmr²</span>
                 </div>
                 <div class="flex items-center gap-2 hover:grayscale-0 transition-all duration-300 hover:text-purple-400">
-                    <span class="font-bold text-lg formula">Στ = Iα</span>
+                    <span class="font-bold text-lg formula">ΣF = M·a_pm</span>
                 </div>
             </div>
         </div>
@@ -176,117 +176,14 @@
                         <!-- Icon: Infinity/Loop -->
                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-3 tilt-content">Momentum Sudut</h3>
+                    <h3 class="text-xl font-semibold mb-3 tilt-content">Pusat Massa</h3>
                     <p class="text-slate-400 leading-relaxed tilt-content mb-4">
-                        Besaran vektor yang merepresentasikan "jumlah gerak" rotasi. Kekal jika tidak ada torsi luar yang bekerja pada sistem.
+                        Titik di mana seluruh massa sistem dianggap terkonsentrasi. Gaya luar bersih bekerja pada titik ini untuk translasi.
                     </p>
                     <div class="flex flex-wrap gap-2 tilt-content">
-                        <span class="text-xs px-2 py-1 rounded bg-white/10 text-emerald-300 formula">L = Iω</span>
+                        <span class="text-xs px-2 py-1 rounded bg-white/10 text-emerald-300 formula">Xpm = Σmx/Σm</span>
                         <span class="text-xs px-2 py-1 rounded bg-white/10 text-emerald-300">Hukum Kekekalan</span>
-                        <span class="text-xs px-2 py-1 rounded bg-white/10 text-emerald-300">Gasing</span>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Derivation/Explanation Section -->
-    <section id="rumus" class="py-24 px-6 relative bg-slate-900/50">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
-
-            <!-- Left Column: Steps -->
-            <div class="reveal">
-                <h2 class="text-3xl md:text-5xl font-bold mb-8">Analisis <br><span class="text-green-400">Gerak Menggelinding</span></h2>
-
-                <div class="relative pl-8 space-y-12">
-                    <div class="timeline-line"></div>
-
-                    <!-- Item 1 -->
-                    <div class="relative">
-                        <div class="absolute -left-[39px] w-6 h-6 rounded-full bg-slate-900 border-4 border-green-500"></div>
-                        <div class="mb-1 text-green-400 font-mono text-sm">Translasi</div>
-                        <h3 class="text-xl font-bold text-white">Hukum Newton II (Linear)</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mt-2">
-                            Benda yang menuruni bidang miring mengalami gaya berat yang menarik ke bawah dan gaya gesek yang menahan ke atas.
-                            <br>
-                            <span class="text-white font-mono block mt-2 p-2 bg-slate-800 rounded">ΣF = m·a <br> mg·sin(θ) - f = m·a</span>
-                        </p>
-                    </div>
-
-                    <!-- Item 2 -->
-                    <div class="relative">
-                        <div class="absolute -left-[39px] w-6 h-6 rounded-full bg-slate-900 border-4 border-teal-500"></div>
-                        <div class="mb-1 text-teal-400 font-mono text-sm">Rotasi</div>
-                        <h3 class="text-xl font-bold text-white">Hukum Newton II (Rotasi)</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mt-2">
-                            Gaya gesek memberikan Torsi (<span class="formula">τ</span>) yang menyebabkan benda berputar terhadap pusat massanya.
-                            <br>
-                            <span class="text-white font-mono block mt-2 p-2 bg-slate-800 rounded">Στ = I·α <br> f·R = I·(a/R)</span>
-                        </p>
-                    </div>
-
-                    <!-- Item 3 -->
-                    <div class="relative">
-                        <div class="absolute -left-[39px] w-6 h-6 rounded-full bg-slate-900 border-4 border-emerald-600"></div>
-                        <div class="mb-1 text-emerald-500 font-mono text-sm">Kombinasi</div>
-                        <h3 class="text-xl font-bold text-white">Percepatan Akhir</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mt-2">
-                            Dengan mensubstitusi persamaan rotasi ke persamaan translasi, kita mendapatkan percepatan benda menggelinding murni.
-                            <br>
-                            <span class="text-white font-mono block mt-2 p-2 bg-slate-800 rounded">a = (g·sinθ) / (1 + k)</span>
-                            <span class="text-xs text-slate-500 italic">Dimana k adalah konstanta inersia (1/2 untuk silinder pejal).</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Formula Reference -->
-            <div class="reveal delay-200" id="education">
-                <h2 class="text-3xl md:text-5xl font-bold mb-8">Rumus <br><span class="text-teal-400">Penting</span></h2>
-
-                <div class="space-y-6">
-                    <!-- Formula Card 1 -->
-                    <div class="glass-panel rounded-xl p-6 border-l-4 border-l-green-500 hover:bg-white/5 transition-colors">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h3 class="text-xl font-bold text-white formula">τ = F · r · sin(θ)</h3>
-                                <p class="text-slate-400 text-sm">Besar Torsi</p>
-                            </div>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-white/5">
-                            <p class="text-slate-300 text-sm mb-2">Gaya (<span class="formula">F</span>) harus tegak lurus terhadap lengan momen (<span class="formula">r</span>) untuk menghasilkan torsi maksimal.</p>
-                        </div>
-                    </div>
-
-                    <!-- Formula Card 2 -->
-                    <div class="glass-panel rounded-xl p-6 border-l-4 border-l-teal-500 hover:bg-white/5 transition-colors">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h3 class="text-xl font-bold text-white formula">I = k · m · R²</h3>
-                                <p class="text-slate-400 text-sm">Momen Inersia</p>
-                            </div>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-white/5">
-                            <p class="text-slate-300 text-sm mb-2">Konstanta (<span class="formula">k</span>) bergantung bentuk:</p>
-                            <ul class="list-disc list-inside text-slate-400 text-xs mt-1">
-                                <li>Silinder Pejal: 1/2</li>
-                                <li>Bola Pejal: 2/5</li>
-                                <li>Cincin Tipis: 1</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Info Card -->
-                    <div class="glass-panel rounded-xl p-6 border border-slate-700/50 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-500/20 to-teal-500/20 blur-xl rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                        <h4 class="text-lg font-semibold text-white mb-3">Syarat Menggelinding</h4>
-                        <div class="text-slate-300 text-sm">
-                            Agar benda menggelinding tanpa selip (tergelincir), harus ada gaya gesek statis yang cukup.
-                            <div class="mt-2 font-mono text-green-400 bg-black/20 p-2 rounded">v = ω · R</div>
-                            <div class="text-xs text-slate-500 mt-1">Kecepatan linear sama dengan kecepatan sudut dikali jari-jari.</div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -296,21 +193,25 @@
     <section id="simulasi" class="py-24 px-6 relative">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16 reveal">
-                <h2 class="text-3xl md:text-5xl font-bold mb-4">Laboratorium <span class="text-green-400">Virtual</span></h2>
-                <p class="text-slate-400 max-w-2xl mx-auto">Simulasi Silinder Pejal Menggelinding pada Bidang Miring.</p>
+                <h2 class="text-3xl md:text-5xl font-bold mb-4">Laboratorium <span class="text-green-400">Rigid Rotor</span></h2>
+                <p class="text-slate-400 max-w-2xl mx-auto">Simulasi 2 Partikel yang terhubung batang tak bermassa di ruang 2D.</p>
             </div>
 
             <!-- Simulation Container -->
             <div class="glass-panel p-8 rounded-2xl reveal border-l-4 border-l-purple-500 mt-12">
                 <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
                     <div>
-                        <h3 class="text-2xl font-bold text-white">Analisis Gaya & Torsi</h3>
-                        <p class="text-purple-400 text-sm font-mono mt-1">Physics Engine • HTML5 Canvas • JavaScript</p>
+                        <h3 class="text-2xl font-bold text-white">Translasi & Rotasi</h3>
+                        <p class="text-purple-400 text-sm font-mono mt-1">Physics Engine • 2D Rigid Body</p>
                     </div>
                 </div>
                 
                 <p class="text-slate-400 mb-8 leading-relaxed max-w-4xl">
-                    Simulasi ini menunjukkan dinamika silinder pejal yang menggelinding menuruni bidang miring. Perhatikan vektor gaya gesek (<span class="text-orange-400 font-bold">f</span>) yang memberikan torsi sehingga benda berputar. Jika sudut terlalu curam atau koefisien gesek terlalu kecil, benda akan tergelincir (slip).
+                    Gunakan slider gaya untuk memberikan dorongan pada partikel 1 (biru) dan partikel 2 (oranye). Gaya bekerja secara <strong>tangensial (tegak lurus batang)</strong>.
+                    <br>
+                    • Jika gaya searah dan sama besar = <strong>Translasi Murni</strong>.
+                    <br>
+                    • Jika gaya berlawanan dan sama besar = <strong>Rotasi Murni</strong>.
                 </p>
 
                 <!-- Embedded Simulation -->
@@ -319,53 +220,57 @@
                     <!-- Controls Sidebar -->
                     <div class="w-full md:w-80 p-6 flex flex-col gap-4 bg-slate-900/80 border-b md:border-b-0 md:border-r border-white/10 overflow-y-auto shrink-0 z-10 backdrop-blur-sm">
                         <h2 class="text-lg font-bold text-green-400 mb-2 flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            Parameter
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                            Kontrol Sistem
                         </h2>
 
-                        <!-- Gravity -->
+                        <!-- Mass 1 -->
                         <div class="control-group">
                             <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                <label>Gravitasi (g)</label>
-                                <span id="val-g">9.8 m/s²</span>
+                                <label class="text-blue-400 font-bold">Massa 1 (Biru)</label>
+                                <span id="val-m1">2.0 kg</span>
                             </div>
-                            <input type="range" id="slider-g" min="1" max="25" step="0.1" value="9.8">
+                            <input type="range" id="slider-m1" min="1" max="10" step="0.5" value="2.0">
                         </div>
 
-                        <!-- Mass -->
+                        <!-- Mass 2 -->
                         <div class="control-group">
                             <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                <label>Massa (m)</label>
-                                <span id="val-m">5.0 kg</span>
+                                <label class="text-orange-400 font-bold">Massa 2 (Oranye)</label>
+                                <span id="val-m2">2.0 kg</span>
                             </div>
-                            <input type="range" id="slider-m" min="1" max="50" step="0.5" value="5.0">
+                            <input type="range" id="slider-m2" min="1" max="10" step="0.5" value="2.0">
                         </div>
 
-                        <!-- Static Friction -->
+                        <!-- Length -->
                         <div class="control-group">
                             <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                <label>Koef. Gesek Statis (μs)</label>
-                                <span id="val-mus">0.50</span>
+                                <label>Panjang Batang</label>
+                                <span id="val-len">150 px</span>
                             </div>
-                            <input type="range" id="slider-mus" min="0" max="1" step="0.01" value="0.5">
+                            <input type="range" id="slider-len" min="50" max="250" step="10" value="150">
                         </div>
 
-                         <!-- Kinetic Friction -->
+                        <div class="w-full h-px bg-white/10 my-2"></div>
+
+                        <!-- Force 1 -->
                         <div class="control-group">
                             <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                <label>Koef. Gesek Kinetis (μk)</label>
-                                <span id="val-muk">0.30</span>
+                                <label class="text-blue-400 font-bold">Gaya P1 (Thruster)</label>
+                                <span id="val-f1">0.0 N</span>
                             </div>
-                            <input type="range" id="slider-muk" min="0" max="1" step="0.01" value="0.3">
+                            <input type="range" id="slider-f1" min="-20" max="20" step="0.5" value="0.0">
+                            <div class="text-[10px] text-slate-500 mt-1">Gaya tegak lurus batang di Partikel 1</div>
                         </div>
 
-                        <!-- Angle -->
+                         <!-- Force 2 -->
                         <div class="control-group">
                             <div class="flex justify-between text-sm mb-1 text-slate-300">
-                                <label>Sudut Kemiringan (θ)</label>
-                                <span id="val-theta">15.0°</span>
+                                <label class="text-orange-400 font-bold">Gaya P2 (Thruster)</label>
+                                <span id="val-f2">0.0 N</span>
                             </div>
-                            <input type="range" id="slider-theta" min="0" max="60" step="0.5" value="15.0">
+                            <input type="range" id="slider-f2" min="-20" max="20" step="0.5" value="0.0">
+                            <div class="text-[10px] text-slate-500 mt-1">Gaya tegak lurus batang di Partikel 2</div>
                         </div>
 
                         <button id="btn-reset" class="mt-4 py-2 px-4 bg-red-500/80 hover:bg-red-500 text-white rounded font-bold transition-colors">
@@ -378,18 +283,22 @@
                         <!-- Stats Overlay -->
                         <div class="absolute top-4 right-4 p-4 bg-slate-900/80 rounded-lg text-xs font-mono border border-slate-700 pointer-events-none z-10 backdrop-blur-sm shadow-xl min-w-[200px]">
                             <div class="flex justify-between text-emerald-400 font-bold mb-2 border-b border-slate-600 pb-1 gap-4">
-                                <span>Status</span>
-                                <span id="stat-state" class="text-white">Diam</span>
+                                <span>Status Sistem</span>
                             </div>
                             <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-400">
-                                <span>Kecepatan (v):</span> <span id="stat-vel" class="text-right text-slate-200">0.00 m/s</span>
-                                <span>Percepatan (a):</span> <span id="stat-acc" class="text-right text-slate-200">0.00 m/s²</span>
-                                <span>Gaya Berat (w):</span> <span id="stat-fg" class="text-right text-purple-300">0.0 N</span>
-                                <span>Gaya Gesek (f):</span> <span id="stat-f" class="text-right text-orange-400">0.0 N</span>
-                                <span class="font-bold text-white pt-1">Torsi (τ):</span> <span id="stat-torque" class="text-right text-white font-bold pt-1">0.0 Nm</span>
+                                <span>Inersia (I):</span> <span id="stat-inertia" class="text-right text-slate-200">0.0 kg.px²</span>
+                                <span>Vel Sudut (ω):</span> <span id="stat-omega" class="text-right text-slate-200">0.0 rad/s</span>
+                                <span>Vel Linear (v):</span> <span id="stat-v" class="text-right text-purple-300">0.0 px/s</span>
+                                <span>Total Gaya:</span> <span id="stat-fnet" class="text-right text-white">0.0 N</span>
+                                <span class="font-bold text-white pt-1">Total Torsi:</span> <span id="stat-torque" class="text-right text-white font-bold pt-1">0.0 Nm</span>
                             </div>
                         </div>
                         <canvas id="sim-canvas"></canvas>
+                        
+                        <!-- Center Marker Helper -->
+                        <div class="absolute bottom-4 left-4 text-[10px] text-slate-500 pointer-events-none">
+                            *Gaya disimulasikan sebagai thruster yang menempel pada partikel (Body Frame)
+                        </div>
                     </div>
 
                 </div>
