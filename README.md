@@ -1,11 +1,65 @@
-Dinamika Rotasi - Virtual Lab ⚛️A high-performance, interactive web simulation for learning Rotational Dynamics (Dinamika Rotasi). This project helps students visualize concepts like Torque, Moment of Inertia, and Angular Acceleration using HTML5 Canvas.🌟 FeaturesReal-time Physics Engine: Calculates angular velocity, acceleration, and torque 60 times per second.3 Distinct Simulation Modes:Single Particle: Basic rotation around a fixed pivot.Rigid Rotor: Two-body system demonstrating coupled translation and rotation.Multi-Particle System: Dynamic system where users can add/remove particles to observe the additive nature of Inertia ($I = \sum mr^2$).Interactive Controls: Sliders for Mass, Radius, Force, and Damping (Air Resistance).Math Visualization: Integrated LaTeX formulas using MathJax.Modern UI: Responsive Dark Mode design with Glassmorphism effects using Tailwind CSS.🚀 Simulations Explained1. Single Particle RotationFocuses on Newton's Second Law for Rotation.Formula: $\tau = I \cdot \alpha$Interaction: Change the mass or radius to see how "heavy" the rotation feels (Inertia). Apply force to generate Torque.2. Rigid Rotor (2D Motion)Simulates a rigid rod with two masses (like a baton or diatomic molecule).Physics: Handles both Linear Motion ($F=ma$) and Rotational Motion ($\tau=I\alpha$).Interaction: Apply different forces to each end of the rod to create pure rotation, pure translation, or complex chaotic motion.3. Multi-Particle SystemDemonstrates the Principle of Superposition for Moment of Inertia.Feature: Add up to 10 particles on a single axis.Physics: $I_{total} = m_1r_1^2 + m_2r_2^2 + ...$Interaction: Visualizes how distributing mass further from the center increases resistance to rotation.🛠️ Technology StackCore: Vanilla JavaScript (ES6 Modules)Rendering: HTML5 Canvas API (2D Context)Styling: Tailwind CSS (via CDN)Math Rendering: MathJaxFonts: Inter & Google Fonts📦 Installation & SetupBecause this project uses JavaScript ES6 Modules (import/export), you cannot simply open index.html in your browser. It requires a local web server to bypass CORS policies.Method 1: VS Code (Recommended)Install the Live Server extension by Ritwick Dey.Right-click index.html and select "Open with Live Server".Method 2: PythonIf you have Python installed, run this in your terminal within the project folder:# Python 3
+🌀 Rotational Dynamics (Dinamika Rotasi) - Interactive Lab
+A modern, web-based interactive physics simulation designed to teach the fundamental concepts of Rotational Dynamics. Built with vanilla JavaScript (ES6 Modules), HTML5 Canvas, and Tailwind CSS.
+🚀 Overview
+This project provides a virtual laboratory where users can experiment with torque, moment of inertia, and angular acceleration in real-time. It features a responsive, "glassmorphism" UI and three distinct simulation modes.
+✨ Features
+1. Single Particle Rotation
+* Concept: Newton's Second Law for Rotation (  ).
+* Interaction: Control the mass, radius, and tangential force applied to a single particle.
+* Visualization: Real-time rendering of force vectors and angular velocity.
+2. Rigid Rotor System (2D)
+   * Concept: Combined translational and rotational motion.
+   * Interaction: Manipulate a rigid rod with two masses. Apply different forces to each end to see how the Center of Mass moves while the object spins.
+   * Physics: Includes damping (air resistance) and wall collision mechanics.
+3. Multi-Particle System
+   * Concept: Additive Moment of Inertia (  ).
+   * Interaction: Dynamically add or remove particles to the system.
+   * Analysis: Observe how the distribution of mass affects the total inertia and the torque required to spin the system.
+🛠️ Tech Stack
+      * Core: HTML5, CSS3, JavaScript (ES6 Modules).
+      * Rendering: HTML5 Canvas API (2D Context).
+      * Styling: Tailwind CSS (via CDN) & Custom CSS.
+      * Math Rendering: MathJax for LaTeX formula display.
+      * Design: Glassmorphism UI, Dark Mode theme, Responsive layout.
+📂 Project Structure
+web_dinamika_rotasi/
+├── index.html              # Main entry point, UI layout, and MathJax config
+├── style.css               # Custom styling, dark theme, and glass effects
+├── script.js               # Main controller, tab switching, and background effects
+├── sim_single_particle.js  # Logic for Simulation 1 (Single Mass)
+├── sim_rigid.js            # Logic for Simulation 2 (Rigid Body Physics)
+├── sim_multi_particle.js   # Logic for Simulation 3 (Dynamic Array of Particles)
+└── README.md               # Project documentation
+
+🚀 How to Run
+⚠️ Important: Because this project uses JavaScript ES6 Modules (type="module" in index.html), you cannot simply double-click the index.html file to run it. Browsers block module requests from the local file system (file://) for security reasons (CORS).
+You must use a local development server.
+Option 1: VS Code (Recommended)
+      1. Install the "Live Server" extension by Ritwick Dey in VS Code.
+      2. Right-click index.html and select "Open with Live Server".
+Option 2: Python
+If you have Python installed, open your terminal in the project folder and run:
+# Python 3
 python -m http.server 8000
-Then open http://localhost:8000 in your browser.Method 3: Node.jsIf you have Node.js installed:npx serve .
-📂 File Structure├── index.html              # Main entry point (UI & Layout)
-├── style.css               # Custom styles & animations
-├── script.js               # Main Controller (Router & Background anim)
-├── sim_single_particle.js  # Logic for Simulation 1
-├── sim_rigid.js            # Logic for Simulation 2
-├── sim_multi_particle.js   # Logic for Simulation 3
-└── README.md               # Documentation
-🤝 ContributingContributions are welcome! Please feel free to submit a Pull Request.Fork the projectCreate your feature branch (git checkout -b feature/AmazingFeature)Commit your changes (git commit -m 'Add some AmazingFeature')Push to the branch (git push origin feature/AmazingFeature)Open a Pull Request📝 LicenseDistributed under the MIT License.
+
+Then open http://localhost:8000 in your browser.
+Option 3: Node.js (http-server)
+npx http-server .
+
+🧮 Physics Formulas Used
+The simulations rely on the following core physics principles:
+      1. Torque (  ):
+  
+(Force applied at a distance from the pivot)
+      2. Moment of Inertia (  ):
+         * Single Particle:   
+         * Discrete System:   
+            3. Angular Acceleration (  ):
+  
+🎨 UI Controls
+               * Sliders: Adjust Mass (  ), Radius (  ), Force (  ), and Damping (Air Resistance).
+               * Tabs: Switch between different experiments instantly.
+               * Stats Panel: Real-time numerical readout of Inertia, Angular Velocity (  ), and Net Torque.
+               * Dynamic Lists: In Simulation 3, use the "+ Tambah Partikel" button to add new masses to the system.
+📝 License
+This project is open-source and available for educational purposes.
