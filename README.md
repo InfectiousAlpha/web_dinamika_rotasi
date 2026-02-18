@@ -1,1 +1,117 @@
-# web_dinamika_rotasi
+Dinamika Rotasi - Virtual Lab ⚛️
+
+A high-performance, interactive web simulation for learning Rotational Dynamics (Dinamika Rotasi). This project helps students visualize concepts like Torque, Moment of Inertia, and Angular Acceleration using HTML5 Canvas.
+
+🌟 Features
+
+Real-time Physics Engine: Calculates angular velocity, acceleration, and torque 60 times per second.
+
+3 Distinct Simulation Modes:
+
+Single Particle: Basic rotation around a fixed pivot.
+
+Rigid Rotor: Two-body system demonstrating coupled translation and rotation.
+
+Multi-Particle System: Dynamic system where users can add/remove particles to observe the additive nature of Inertia ($I = \sum mr^2$).
+
+Interactive Controls: Sliders for Mass, Radius, Force, and Damping (Air Resistance).
+
+Math Visualization: Integrated LaTeX formulas using MathJax.
+
+Modern UI: Responsive Dark Mode design with Glassmorphism effects using Tailwind CSS.
+
+🚀 Simulations Explained
+
+1. Single Particle Rotation
+
+Focuses on Newton's Second Law for Rotation.
+
+Formula: $\tau = I \cdot \alpha$
+
+Interaction: Change the mass or radius to see how "heavy" the rotation feels (Inertia). Apply force to generate Torque.
+
+2. Rigid Rotor (2D Motion)
+
+Simulates a rigid rod with two masses (like a baton or diatomic molecule).
+
+Physics: Handles both Linear Motion ($F=ma$) and Rotational Motion ($\tau=I\alpha$).
+
+Interaction: Apply different forces to each end of the rod to create pure rotation, pure translation, or complex chaotic motion.
+
+3. Multi-Particle System
+
+Demonstrates the Principle of Superposition for Moment of Inertia.
+
+Feature: Add up to 10 particles on a single axis.
+
+Physics: $I_{total} = m_1r_1^2 + m_2r_2^2 + ...$
+
+Interaction: Visualizes how distributing mass further from the center increases resistance to rotation.
+
+🛠️ Technology Stack
+
+Core: Vanilla JavaScript (ES6 Modules)
+
+Rendering: HTML5 Canvas API (2D Context)
+
+Styling: Tailwind CSS (via CDN)
+
+Math Rendering: MathJax
+
+Fonts: Inter & Google Fonts
+
+📦 Installation & Setup
+
+Because this project uses JavaScript ES6 Modules (import/export), you cannot simply open index.html in your browser. It requires a local web server to bypass CORS policies.
+
+Method 1: VS Code (Recommended)
+
+Install the Live Server extension by Ritwick Dey.
+
+Right-click index.html and select "Open with Live Server".
+
+Method 2: Python
+
+If you have Python installed, run this in your terminal within the project folder:
+
+# Python 3
+python -m http.server 8000
+
+
+Then open http://localhost:8000 in your browser.
+
+Method 3: Node.js
+
+If you have Node.js installed:
+
+npx serve .
+
+
+📂 File Structure
+
+├── index.html              # Main entry point (UI & Layout)
+├── style.css               # Custom styles & animations
+├── script.js               # Main Controller (Router & Background anim)
+├── sim_single_particle.js  # Logic for Simulation 1
+├── sim_rigid.js            # Logic for Simulation 2
+├── sim_multi_particle.js   # Logic for Simulation 3
+└── README.md               # Documentation
+
+
+🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+Fork the project
+
+Create your feature branch (git checkout -b feature/AmazingFeature)
+
+Commit your changes (git commit -m 'Add some AmazingFeature')
+
+Push to the branch (git push origin feature/AmazingFeature)
+
+Open a Pull Request
+
+📝 License
+
+Distributed under the MIT License.
